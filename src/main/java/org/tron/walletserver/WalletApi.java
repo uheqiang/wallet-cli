@@ -52,7 +52,7 @@ public class WalletApi {
   private boolean loginState = false;
   private byte[] address;
   private static byte addressPreFixByte = CommonConstant.ADD_PRE_FIX_BYTE_TESTNET;
-  private static int rpcVersion = 0;
+  private static int rpcVersion = 2;
   private static boolean isEckey = true;
 
   private static GrpcClient rpcCli = init();
@@ -728,13 +728,25 @@ public class WalletApi {
     }
   }
 
-  public boolean createAccount(byte[] owner, byte[] address)
+  /**
+   * 个人用户 注册
+   * @param owner 商家 或 称为可信节点
+   * @param address 个人用户地址
+   * @param identity 个人用户信息集的哈希值，链上不存储用户的身份敏感信息
+   * @param appId 商家 或 称为可信节点ID
+   */
+  public boolean createAccount(byte[] owner, byte[] address, String identity, String appId)
       throws CipherException, IOException, CancelException {
     if (owner == null) {
       owner = getAddress();
     }
 
-    Contract.AccountCreateContract contract = createAccountCreateContract(owner, address);
+    PersonalInfo info = PersonalInfo.newBuilder()
+            .setAppID(appId)
+            .setIdentity(identity)
+            .build();
+
+    Contract.AccountCreateContract contract = createAccountCreateContract(owner, address, info);
     if (rpcVersion == 2) {
       TransactionExtention transactionExtention = rpcCli.createAccount2(contract);
       return processTransactionExtention(transactionExtention);
@@ -742,6 +754,20 @@ public class WalletApi {
       Transaction transaction = rpcCli.createAccount(contract);
       return processTransaction(transaction);
     }
+  }
+
+  /**
+   * 注册商家 或称为可信节点
+   * @param appId 商家ID
+   */
+  public boolean createBusiness(String appId) throws CipherException, IOException, CancelException {
+    PersonalInfo info = PersonalInfo.newBuilder().setAppID(appId).build();
+    Contract.BusinessCreateContract contract = createBusinessCreateContract(address, info);
+    if (rpcVersion == 2) {
+      TransactionExtention transactionExtention = rpcCli.createBusiness2(contract);
+      return processTransactionExtention(transactionExtention);
+    }
+    return false;
   }
 
   // Warning: do not invoke this interface provided by others.
@@ -887,10 +913,20 @@ public class WalletApi {
   }
 
   public static Contract.AccountCreateContract createAccountCreateContract(
-      byte[] owner, byte[] address) {
+      byte[] owner, byte[] address, PersonalInfo info) {
     Contract.AccountCreateContract.Builder builder = Contract.AccountCreateContract.newBuilder();
     builder.setOwnerAddress(ByteString.copyFrom(owner));
     builder.setAccountAddress(ByteString.copyFrom(address));
+    builder.setPersonalInfo(info);
+
+    return builder.build();
+  }
+
+  public static Contract.BusinessCreateContract createBusinessCreateContract(
+          byte[] address, PersonalInfo info) {
+    Contract.BusinessCreateContract.Builder builder = Contract.BusinessCreateContract.newBuilder();
+    builder.setAccountAddress(ByteString.copyFrom(address));
+    builder.setPersonalInfo(info);
 
     return builder.build();
   }

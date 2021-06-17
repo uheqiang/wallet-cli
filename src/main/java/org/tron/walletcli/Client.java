@@ -900,6 +900,21 @@ public class Client {
     }
   }
 
+
+  private void createBusiness() throws CipherException, IOException, CancelException {
+    // 分布式生成全局为唯一ID
+    UUID uuid = UUID.randomUUID();
+    String appId = uuid.toString().replace("-","");
+    boolean result = walletApiWrapper.createBusiness(appId);
+    if (result) {
+      System.out.println("CreateBusiness successful !!");
+      System.out.println("appId: " + appId);
+    } else {
+      System.out.println("CreateBusiness failed !!");
+    }
+  }
+
+
   private void createWitness(String[] parameters)
       throws IOException, CipherException, CancelException {
     if (parameters == null || (parameters.length != 1 && parameters.length != 2)) {
@@ -3057,6 +3072,10 @@ public class Client {
             }
             case "createaccount": {
               createAccount(parameters);
+              break;
+            }
+            case "createbusiness": {
+              createBusiness();
               break;
             }
             case "createwitness": {

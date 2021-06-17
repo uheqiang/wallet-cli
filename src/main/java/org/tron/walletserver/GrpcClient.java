@@ -378,6 +378,10 @@ public class GrpcClient {
     return blockingStubFull.createAccount2(contract);
   }
 
+  public TransactionExtention createBusiness2(Contract.BusinessCreateContract contract) {
+    return blockingStubFull.createBusiness2(contract);
+  }
+
   public AddressPrKeyPairMessage generateAddress(EmptyMessage emptyMessage) {
     if (blockingStubSolidity != null) {
       return blockingStubSolidity.generateAddress(emptyMessage);

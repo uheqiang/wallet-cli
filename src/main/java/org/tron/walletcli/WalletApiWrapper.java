@@ -289,7 +289,16 @@ public class WalletApiWrapper {
       return false;
     }
 
-    return wallet.createAccount(ownerAddress, address);
+    return wallet.createAccount(ownerAddress, address,null,null);
+  }
+
+  public boolean createBusiness(String appId) throws CipherException, IOException, CancelException {
+    if (wallet == null || !wallet.isLoginState()) {
+      System.out.println("Warning: createBusiness failed,  Please login first !!");
+      return false;
+    }
+
+    return wallet.createBusiness(appId);
   }
 
   public AddressPrKeyPairMessage generateAddress() {
