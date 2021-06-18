@@ -54,6 +54,9 @@ public class WalletApi {
   private static byte addressPreFixByte = CommonConstant.ADD_PRE_FIX_BYTE_TESTNET;
   private static int rpcVersion = 2;
   private static boolean isEckey = true;
+  private byte[] password;
+  // appId 商家 或 称为可信节点ID
+  private static String appId;
 
   private static GrpcClient rpcCli = init();
 
@@ -75,11 +78,14 @@ public class WalletApi {
     }
     if (config.hasPath("RPC_version")) {
       rpcVersion = config.getInt("RPC_version");
-      System.out.println("WalletApi getRpcVsersion: " + rpcVersion);
+//      System.out.println("WalletApi getRpcVsersion: " + rpcVersion);
     }
     if (config.hasPath("crypto.engine")) {
       isEckey = config.getString("crypto.engine").equalsIgnoreCase("eckey");
-      System.out.println("WalletApi getConfig isEckey: " + isEckey);
+//      System.out.println("WalletApi getConfig isEckey: " + isEckey);
+    }
+    if (config.hasPath("appId")) {
+      appId = config.getString("appId");
     }
     return new GrpcClient(fullNode, solidityNode);
   }
@@ -171,7 +177,11 @@ public class WalletApi {
   }
 
   public boolean checkPassword(byte[] passwd) throws CipherException {
-    return Wallet.validPassword(passwd, this.walletFile.get(0));
+    boolean validPassword = Wallet.validPassword(passwd, this.walletFile.get(0));
+    if (validPassword) {
+      this.password = passwd;
+    }
+    return false;
   }
 
   /**
@@ -354,38 +364,47 @@ public class WalletApi {
     String tipsString = "Please confirm and input your permission id, if input y or Y means "
         + "default 0, other non-numeric characters will cancel transaction.";
     transaction = TransactionUtils.setPermissionId(transaction, tipsString);
-    while (true) {
-      System.out.println("Please choose your key for sign.");
-      WalletFile walletFile = selcetWalletFileE();
-      System.out.println("Please input your password.");
-      char[] password = Utils.inputPassword(false);
-      byte[] passwd = org.tron.keystore.StringUtils.char2Byte(password);
-      org.tron.keystore.StringUtils.clear(password);
-      if (isEckey) {
-        transaction = TransactionUtils.sign(transaction, this.getEcKey(walletFile, passwd));
-      } else {
-        transaction = TransactionUtils.sign(transaction, this.getSM2(walletFile, passwd));
-      }
-      org.tron.keystore.StringUtils.clear(passwd);
-
-      TransactionSignWeight weight = getTransactionSignWeight(transaction);
-      if (weight.getResult().getCode() == response_code.ENOUGH_PERMISSION) {
-        break;
-      }
-      if (weight.getResult().getCode() == response_code.NOT_ENOUGH_PERMISSION) {
-        System.out.println("Current signWeight is:");
-        System.out.println(Utils.printTransactionSignWeight(weight));
-        System.out.println("Please confirm if continue add signature enter y or Y, else any other");
-        if (!confirm()) {
-          showTransactionAfterSign(transaction);
-          throw new CancelException("User cancelled");
-        }
-        continue;
-      }
+    WalletFile walletFile = selcetWalletFileE();
+    if (isEckey) {
+      transaction = TransactionUtils.sign(transaction, this.getEcKey(walletFile, password));
+    } else {
+      transaction = TransactionUtils.sign(transaction, this.getSM2(walletFile, password));
+    }
+    TransactionSignWeight weight = getTransactionSignWeight(transaction);
+    if (weight.getResult().getCode() == response_code.NOT_ENOUGH_PERMISSION) {
       throw new CancelException(weight.getResult().getMessage());
     }
-
     return transaction;
+//    while (true) {
+//      System.out.println("Please choose your key for sign.");
+//      WalletFile walletFile = selcetWalletFileE();
+//      System.out.println("Please input your password.");
+//      char[] password = Utils.inputPassword(false);
+//      byte[] passwd = org.tron.keystore.StringUtils.char2Byte(password);
+//      org.tron.keystore.StringUtils.clear(password);
+//      if (isEckey) {
+//        transaction = TransactionUtils.sign(transaction, this.getEcKey(walletFile, passwd));
+//      } else {
+//        transaction = TransactionUtils.sign(transaction, this.getSM2(walletFile, passwd));
+//      }
+//      org.tron.keystore.StringUtils.clear(passwd);
+//
+//      TransactionSignWeight weight = getTransactionSignWeight(transaction);
+//      if (weight.getResult().getCode() == response_code.ENOUGH_PERMISSION) {
+//        break;
+//      }
+//      if (weight.getResult().getCode() == response_code.NOT_ENOUGH_PERMISSION) {
+//        System.out.println("Current signWeight is:");
+//        System.out.println(Utils.printTransactionSignWeight(weight));
+//        System.out.println("Please confirm if continue add signature enter y or Y, else any other");
+//        if (!confirm()) {
+//          showTransactionAfterSign(transaction);
+//          throw new CancelException("User cancelled");
+//        }
+//        continue;
+//      }
+//      throw new CancelException(weight.getResult().getMessage());
+//    }
   }
 
   private Transaction signOnlyForShieldedTransaction(Transaction transaction)
@@ -733,14 +752,16 @@ public class WalletApi {
    * @param owner 商家 或 称为可信节点
    * @param address 个人用户地址
    * @param identity 个人用户信息集的哈希值，链上不存储用户的身份敏感信息
-   * @param appId 商家 或 称为可信节点ID
+   * @param
    */
-  public boolean createAccount(byte[] owner, byte[] address, String identity, String appId)
+  public boolean createAccount(byte[] owner, byte[] address, String identity)
       throws CipherException, IOException, CancelException {
     if (owner == null) {
       owner = getAddress();
     }
-
+    if (StringUtils.isEmpty(appId)) {
+      return false;
+    }
     PersonalInfo info = PersonalInfo.newBuilder()
             .setAppID(appId)
             .setIdentity(identity)

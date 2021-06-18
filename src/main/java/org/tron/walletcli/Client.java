@@ -892,7 +892,9 @@ public class Client {
       return;
     }
 
-    boolean result = walletApiWrapper.createAccount(ownerAddress, address);
+    String identity = "";
+
+    boolean result = walletApiWrapper.createAccount(address, identity);
     if (result) {
       System.out.println("CreateAccount successful !!");
     } else {

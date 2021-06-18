@@ -102,6 +102,8 @@ public class WalletApiWrapper {
     wallet = WalletApi.loadWalletFromKeystore();
 
     System.out.println("Please input your password.");
+
+    //todo 接收外部传入的参数
     char[] password = Utils.inputPassword(false);
     byte[] passwd = StringUtils.char2Byte(password);
     StringUtils.clear(password);
@@ -282,14 +284,14 @@ public class WalletApiWrapper {
     return wallet.createAssetIssue(builder.build());
   }
 
-  public boolean createAccount(byte[] ownerAddress, byte[] address)
+  public boolean createAccount(byte[] address, String identity)
       throws CipherException, IOException, CancelException {
     if (wallet == null || !wallet.isLoginState()) {
       System.out.println("Warning: createAccount failed,  Please login first !!");
       return false;
     }
 
-    return wallet.createAccount(ownerAddress, address,null,null);
+    return wallet.createAccount(null, address, identity);
   }
 
   public boolean createBusiness(String appId) throws CipherException, IOException, CancelException {
