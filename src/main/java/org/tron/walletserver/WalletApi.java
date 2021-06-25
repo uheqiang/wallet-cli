@@ -462,14 +462,12 @@ public class WalletApi {
       return false;
     }
 
-    if (transaction.getRawData().getContract(0).getType()
-        == ContractType.ShieldedTransferContract) {
+    if (transaction.getRawData().getContract(0).getType() == ContractType.ShieldedTransferContract) {
       return false;
     }
 
     System.out.println(Utils.printTransactionExceptId(transactionExtention.getTransaction()));
-    System.out.println("before sign transaction hex string is " +
-        ByteArray.toHexString(transaction.toByteArray()));
+    System.out.println("before sign transaction hex string is " + ByteArray.toHexString(transaction.toByteArray()));
     transaction = signTransaction(transaction);
     showTransactionAfterSign(transaction);
     return rpcCli.broadcastTransaction(transaction);
@@ -779,9 +777,11 @@ public class WalletApi {
 
   /**
    * 注册商家 或称为可信节点
-   * @param appId 商家ID
    */
-  public boolean createBusiness(String appId) throws CipherException, IOException, CancelException {
+  public boolean createBusiness() throws CipherException, IOException, CancelException {
+    // 分布式生成全局为唯一ID
+    UUID uuid = UUID.randomUUID();
+    String appId = uuid.toString().replace("-","");
     PersonalInfo info = PersonalInfo.newBuilder().setAppID(appId).build();
     Contract.BusinessCreateContract contract = createBusinessCreateContract(address, info);
     if (rpcVersion == 2) {
@@ -939,6 +939,7 @@ public class WalletApi {
     builder.setOwnerAddress(ByteString.copyFrom(owner));
     builder.setAccountAddress(ByteString.copyFrom(address));
     builder.setPersonalInfo(info);
+    builder.setType(AccountType.AssetIssue);
 
     return builder.build();
   }
@@ -948,6 +949,7 @@ public class WalletApi {
     Contract.BusinessCreateContract.Builder builder = Contract.BusinessCreateContract.newBuilder();
     builder.setAccountAddress(ByteString.copyFrom(address));
     builder.setPersonalInfo(info);
+    builder.setType(AccountType.Normal);
 
     return builder.build();
   }

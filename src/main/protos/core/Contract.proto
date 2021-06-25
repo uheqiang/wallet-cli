@@ -127,12 +127,12 @@ message AssetIssueContract {
   int32 trx_num = 6;
   int32 precision = 7;
   int32 num = 8;
-  int64 start_time = 9;
-  int64 end_time = 10;
+//  int64 start_time = 9;
+//  int64 end_time = 10;
   int64 order = 11; // useless
   int32 vote_score = 16;
-  bytes description = 20;
-  bytes url = 21;
+//  bytes description = 20;
+//  bytes url = 21;
   int64 free_asset_net_limit = 22;
   int64 public_free_asset_net_limit = 23;
   int64 public_free_asset_net_usage = 24;

@@ -197,11 +197,28 @@ public class WalletApiWrapper {
     return wallet.participateAssetIssue(ownerAddress, toAddress, assertName.getBytes(), amount);
   }
 
+  /**
+   * 发布资产，可以是商家发布Token
+   * @param ownerAddress token拥有者
+   * @param name token名称
+   * @param abbrName token简称
+   * @param totalSupply token发布总量
+   * @param trxNum abandon
+   * @param icoNum abandon
+   * @param precision abandon
+   * @param startTime abandon
+   * @param endTime abandon
+   * @param voteScore abandon
+   * @param description abandon
+   * @param url abandon
+   * @param freeNetLimit abandon
+   * @param publicFreeNetLimit abandon
+   * @param frozenSupply abandon
+   */
   public boolean assetIssue(byte[] ownerAddress, String name, String abbrName, long totalSupply,
-      int trxNum, int icoNum,
-      int precision, long startTime, long endTime, int voteScore, String description, String url,
-      long freeNetLimit, long publicFreeNetLimit, HashMap<String, String> frozenSupply)
-      throws CipherException, IOException, CancelException {
+      int trxNum, int icoNum, int precision, long startTime, long endTime, int voteScore,
+      String description, String url, long freeNetLimit, long publicFreeNetLimit,
+      HashMap<String, String> frozenSupply) throws CipherException, IOException, CancelException {
     if (wallet == null || !wallet.isLoginState()) {
       System.out.println("Warning: assetIssue failed,  Please login first !!");
       return false;
@@ -221,7 +238,7 @@ public class WalletApiWrapper {
     }
     builder.setTotalSupply(totalSupply);
 
-    if (trxNum <= 0) {
+    /*if (trxNum <= 0) {
       System.out.println("trxNum should greater than 0. but really is " + trxNum);
       return false;
     }
@@ -237,9 +254,9 @@ public class WalletApiWrapper {
       System.out.println("precision should greater or equal to 0. but really is " + precision);
       return false;
     }
-    builder.setPrecision(precision);
+    builder.setPrecision(precision);*/
 
-    long now = System.currentTimeMillis();
+    /*long now = System.currentTimeMillis();
     if (startTime <= now) {
       System.out.println("startTime should greater than now. but really is startTime("
           + startTime + ") now(" + now + ")");
@@ -260,26 +277,26 @@ public class WalletApiWrapper {
       System.out.println("publicFreeAssetNetLimit should greater or equal to 0. but really is "
           + publicFreeNetLimit);
       return false;
-    }
+    }*/
 
-    builder.setStartTime(startTime);
-    builder.setEndTime(endTime);
-    builder.setVoteScore(voteScore);
-    builder.setDescription(ByteString.copyFrom(description.getBytes()));
-    builder.setUrl(ByteString.copyFrom(url.getBytes()));
-    builder.setFreeAssetNetLimit(freeNetLimit);
-    builder.setPublicFreeAssetNetLimit(publicFreeNetLimit);
+//    builder.setStartTime(startTime);
+//    builder.setEndTime(endTime);
+//    builder.setVoteScore(voteScore);
+//    builder.setDescription(ByteString.copyFrom(description.getBytes()));
+//    builder.setUrl(ByteString.copyFrom(url.getBytes()));
+//    builder.setFreeAssetNetLimit(freeNetLimit);
+//    builder.setPublicFreeAssetNetLimit(publicFreeNetLimit);
 
-    for (String daysStr : frozenSupply.keySet()) {
-      String amountStr = frozenSupply.get(daysStr);
-      long amount = Long.parseLong(amountStr);
-      long days = Long.parseLong(daysStr);
-      Contract.AssetIssueContract.FrozenSupply.Builder frozenSupplyBuilder
-          = Contract.AssetIssueContract.FrozenSupply.newBuilder();
-      frozenSupplyBuilder.setFrozenAmount(amount);
-      frozenSupplyBuilder.setFrozenDays(days);
-      builder.addFrozenSupply(frozenSupplyBuilder.build());
-    }
+//    for (String daysStr : frozenSupply.keySet()) {
+//      String amountStr = frozenSupply.get(daysStr);
+//      long amount = Long.parseLong(amountStr);
+//      long days = Long.parseLong(daysStr);
+//      Contract.AssetIssueContract.FrozenSupply.Builder frozenSupplyBuilder
+//          = Contract.AssetIssueContract.FrozenSupply.newBuilder();
+//      frozenSupplyBuilder.setFrozenAmount(amount);
+//      frozenSupplyBuilder.setFrozenDays(days);
+//      builder.addFrozenSupply(frozenSupplyBuilder.build());
+//    }
 
     return wallet.createAssetIssue(builder.build());
   }
@@ -294,13 +311,12 @@ public class WalletApiWrapper {
     return wallet.createAccount(null, address, identity);
   }
 
-  public boolean createBusiness(String appId) throws CipherException, IOException, CancelException {
+  public boolean createBusiness() throws CipherException, IOException, CancelException {
     if (wallet == null || !wallet.isLoginState()) {
       System.out.println("Warning: createBusiness failed,  Please login first !!");
       return false;
     }
-
-    return wallet.createBusiness(appId);
+    return wallet.createBusiness();
   }
 
   public AddressPrKeyPairMessage generateAddress() {
@@ -697,8 +713,7 @@ public class WalletApiWrapper {
       System.out.println("Warning: createContract failed,  Please login first !!");
       return false;
     }
-    return wallet
-        .deployContract(ownerAddress, name, abiStr, codeStr, feeLimit, value,
+    return wallet.deployContract(ownerAddress, name, abiStr, codeStr, feeLimit, value,
             consumeUserResourcePercent,
             originEnergyLimit, tokenValue, tokenId,
             libraryAddressPair, compilerVersion);

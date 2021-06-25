@@ -615,8 +615,7 @@ public class ShieldedWrapper {
       return null;
     }
 
-    List<ShieldedAddressInfo> shieldedAddressInfoList = new ArrayList(
-        shieldedAddressInfoMap.values());
+    List<ShieldedAddressInfo> shieldedAddressInfoList = new ArrayList(shieldedAddressInfoMap.values());
     for (int i = 0; i < shieldedAddressInfoList.size(); i++) {
       System.out.println("The " + (i + 1) + "th shielded address is "
           + shieldedAddressInfoList.get(i).getAddress());

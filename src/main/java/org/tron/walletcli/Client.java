@@ -786,12 +786,10 @@ public class Client {
     boolean result = walletApiWrapper
         .participateAssetIssue(ownerAddress, toAddress, assertName, amount);
     if (result) {
-      System.out
-          .println("ParticipateAssetIssue " + assertName + " " + amount + " from " + base58Address
+      System.out.println("ParticipateAssetIssue " + assertName + " " + amount + " from " + base58Address
               + " successful !!");
     } else {
-      System.out
-          .println("ParticipateAssetIssue " + assertName + " " + amount + " from " + base58Address
+      System.out.println("ParticipateAssetIssue " + assertName + " " + amount + " from " + base58Address
               + " failed !!");
     }
   }
@@ -799,17 +797,12 @@ public class Client {
   private void assetIssue(String[] parameters)
       throws IOException, CipherException, CancelException {
     if (parameters == null || parameters.length < 12) {
-      System.out
-          .println("Use the assetIssue command for features that you require with below syntax: ");
-      System.out.println(
-          "AssetIssue [OwnerAddress] AssetName AbbrName TotalSupply TrxNum AssetNum Precision "
+      System.out.println("Use the assetIssue command for features that you require with below syntax: ");
+      System.out.println("AssetIssue [OwnerAddress] AssetName AbbrName TotalSupply TrxNum AssetNum Precision "
               + "StartDate EndDate Description Url FreeNetLimitPerAccount PublicFreeNetLimit "
               + "FrozenAmount0 FrozenDays0 ... FrozenAmountN FrozenDaysN");
-      System.out
-          .println(
-              "TrxNum and AssetNum represents the conversion ratio of the tron to the asset.");
-      System.out
-          .println("The StartDate and EndDate format should look like 2018-03-01 2018-03-21 .");
+      System.out.println("TrxNum and AssetNum represents the conversion ratio of the tron to the asset.");
+      System.out.println("The StartDate and EndDate format should look like 2018-03-01 2018-03-21 .");
       return;
     }
 
@@ -848,8 +841,7 @@ public class Client {
     Date startDate = Utils.strToDateLong(startYyyyMmDd);
     Date endDate = Utils.strToDateLong(endYyyyMmDd);
     if (startDate == null || endDate == null) {
-      System.out
-          .println("The StartDate and EndDate format should look like 2018-03-01 2018-03-21 .");
+      System.out.println("The StartDate and EndDate format should look like 2018-03-01 2018-03-21 .");
       System.out.println("AssetIssue " + name + " failed !!");
       return;
     }
@@ -904,13 +896,9 @@ public class Client {
 
 
   private void createBusiness() throws CipherException, IOException, CancelException {
-    // 分布式生成全局为唯一ID
-    UUID uuid = UUID.randomUUID();
-    String appId = uuid.toString().replace("-","");
-    boolean result = walletApiWrapper.createBusiness(appId);
+    boolean result = walletApiWrapper.createBusiness();
     if (result) {
       System.out.println("CreateBusiness successful !!");
-      System.out.println("appId: " + appId);
     } else {
       System.out.println("CreateBusiness failed !!");
     }
