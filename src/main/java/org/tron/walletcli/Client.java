@@ -796,7 +796,7 @@ public class Client {
 
   private void assetIssue(String[] parameters)
       throws IOException, CipherException, CancelException {
-    if (parameters == null || parameters.length < 12) {
+    /*if (parameters == null || parameters.length < 12) {
       System.out.println("Use the assetIssue command for features that you require with below syntax: ");
       System.out.println("AssetIssue [OwnerAddress] AssetName AbbrName TotalSupply TrxNum AssetNum Precision "
               + "StartDate EndDate Description Url FreeNetLimitPerAccount PublicFreeNetLimit "
@@ -851,13 +851,13 @@ public class Client {
     long publicFreeNetLimit = new Long(publicFreeNetLimitString);
 
     boolean result = walletApiWrapper.assetIssue(ownerAddress, name, abbrName, totalSupply,
-        trxNum, icoNum, precision, startTime, endTime, 0,
-        description, url, freeAssetNetLimit, publicFreeNetLimit, frozenSupply);
+        *//*trxNum, icoNum, precision, startTime, endTime, 0,
+        description, url, freeAssetNetLimit, publicFreeNetLimit, frozenSupply*//*);
     if (result) {
       System.out.println("AssetIssue " + name + " successful !!");
     } else {
       System.out.println("AssetIssue " + name + " failed !!");
-    }
+    }*/
   }
 
   private void createAccount(String[] parameters)
@@ -1169,8 +1169,7 @@ public class Client {
       receiverAddress = WalletApi.decodeFromBase58Check(parameters[index]);
     }
 
-    boolean result = walletApiWrapper.freezeBalance(ownerAddress, frozen_balance,
-        frozen_duration, resourceCode, receiverAddress);
+    boolean result = walletApiWrapper.freezeBalance(ownerAddress, frozen_balance, /*resourceCode,*/ null,receiverAddress);
     if (result) {
       System.out.println("FreezeBalance successful !!!");
     } else {

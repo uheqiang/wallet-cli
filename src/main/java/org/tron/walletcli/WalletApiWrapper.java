@@ -196,28 +196,18 @@ public class WalletApiWrapper {
     return wallet.participateAssetIssue(ownerAddress, toAddress, assertName.getBytes(), amount);
   }
 
+
   /**
    * 发布资产，可以是商家发布Token
    * @param ownerAddress token拥有者
    * @param name token名称
    * @param abbrName token简称
    * @param totalSupply token发布总量
-   * @param trxNum abandon
-   * @param icoNum abandon
-   * @param precision abandon
-   * @param startTime abandon
-   * @param endTime abandon
-   * @param voteScore abandon
-   * @param description abandon
-   * @param url abandon
-   * @param freeNetLimit abandon
-   * @param publicFreeNetLimit abandon
-   * @param frozenSupply abandon
    */
-  public boolean assetIssue(byte[] ownerAddress, String name, String abbrName, long totalSupply,
-      int trxNum, int icoNum, int precision, long startTime, long endTime, int voteScore,
+  public boolean assetIssue(byte[] ownerAddress, String name, String abbrName, long totalSupply
+          /*,int trxNum, int icoNum, int precision, long startTime, long endTime, int voteScore,
       String description, String url, long freeNetLimit, long publicFreeNetLimit,
-      HashMap<String, String> frozenSupply) throws CipherException, IOException, CancelException {
+      HashMap<String, String> frozenSupply*/) throws CipherException, IOException, CancelException {
     if (wallet == null || !wallet.isLoginState()) {
       System.out.println("Warning: assetIssue failed,  Please login first !!");
       return false;
@@ -226,6 +216,7 @@ public class WalletApiWrapper {
     Contract.AssetIssueContract.Builder builder = Contract.AssetIssueContract.newBuilder();
     if (ownerAddress == null) {
       ownerAddress = wallet.getAddress();
+      System.out.println("ownerAddress: " + WalletApi.encode58Check(ownerAddress));
     }
     builder.setOwnerAddress(ByteString.copyFrom(ownerAddress));
     builder.setName(ByteString.copyFrom(name.getBytes()));
@@ -479,16 +470,24 @@ public class WalletApiWrapper {
     return wallet.updateAsset(ownerAddress, description, url, newLimit, newPublicLimit);
   }
 
-  public boolean freezeBalance(byte[] ownerAddress, long frozen_balance, long frozen_duration,
-      int resourceCode, byte[] receiverAddress)
+  /**
+   * 冻结TRC10资源，获取能量
+   * @param ownerAddress trc10拥有者
+   * @param frozen_balance 冻结的trc10的数量
+   * @param receiverAddress 能量接收者
+   */
+  public boolean freezeBalance(byte[] ownerAddress, long frozen_balance, ByteString assertName, byte[] receiverAddress)
       throws CipherException, IOException, CancelException {
     if (wallet == null || !wallet.isLoginState()) {
       System.out.println("Warning: freezeBalance failed, Please login first !!");
       return false;
     }
 
-    return wallet.freezeBalance(ownerAddress, frozen_balance, frozen_duration, resourceCode,
-        receiverAddress);
+    return wallet.freezeBalance(ownerAddress,
+            frozen_balance,
+            Contract.ResourceCode.ENERGY_VALUE,
+            assertName,
+            receiverAddress);
   }
 
   public boolean buyStorage(byte[] ownerAddress, long quantity)
