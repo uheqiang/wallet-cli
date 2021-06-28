@@ -101,14 +101,13 @@ public class WalletApiWrapper {
     logout();
     wallet = WalletApi.loadWalletFromKeystore();
 
-    System.out.println("Please input your password.");
+//    System.out.println("Please input your password.");
 
-    //todo 接收外部传入的参数
-    char[] password = Utils.inputPassword(false);
-    byte[] passwd = StringUtils.char2Byte(password);
-    StringUtils.clear(password);
-    wallet.checkPassword(passwd);
-    StringUtils.clear(passwd);
+//    char[] password = Utils.inputPassword(false);
+//    byte[] passwd = StringUtils.char2Byte(password);
+//    StringUtils.clear(password);
+    wallet.checkPassword();
+//    StringUtils.clear(passwd);
 
     if (wallet == null) {
       System.out.println("Warning: Login failed, Please registerWallet or importWallet first !!");

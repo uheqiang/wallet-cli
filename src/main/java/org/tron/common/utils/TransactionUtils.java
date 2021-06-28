@@ -255,7 +255,7 @@ public class TransactionUtils {
     }
 
     System.out.println(tipString);
-    int permission_id = inputPermissionId();
+    int permission_id = 0;//inputPermissionId();
     if (permission_id < 0) {
       throw new CancelException("User cancelled");
     }

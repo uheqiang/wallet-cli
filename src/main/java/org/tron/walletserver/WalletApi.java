@@ -54,7 +54,7 @@ public class WalletApi {
   private static byte addressPreFixByte = CommonConstant.ADD_PRE_FIX_BYTE_TESTNET;
   private static int rpcVersion = 2;
   private static boolean isEckey = true;
-  private byte[] password;
+  private static byte[] password;
   // appId 商家 或 称为可信节点ID
   private static String appId;
 
@@ -86,6 +86,12 @@ public class WalletApi {
     }
     if (config.hasPath("appId")) {
       appId = config.getString("appId");
+    }
+
+    if (config.hasPath("pwd")) {
+      String pwd = config.getString("pwd");
+      password = org.tron.keystore.StringUtils.char2Byte(pwd.toCharArray());
+//      password = pwd.getBytes();
     }
     return new GrpcClient(fullNode, solidityNode);
   }
@@ -176,12 +182,8 @@ public class WalletApi {
     loginState = true;
   }
 
-  public boolean checkPassword(byte[] passwd) throws CipherException {
-    boolean validPassword = Wallet.validPassword(passwd, this.walletFile.get(0));
-    if (validPassword) {
-      this.password = passwd;
-    }
-    return false;
+  public boolean checkPassword() throws CipherException {
+    return Wallet.validPassword(password, this.walletFile.get(0));
   }
 
   /**
@@ -947,6 +949,7 @@ public class WalletApi {
   public static Contract.BusinessCreateContract createBusinessCreateContract(
           byte[] address, PersonalInfo info) {
     Contract.BusinessCreateContract.Builder builder = Contract.BusinessCreateContract.newBuilder();
+    builder.setOwnerAddress(ByteString.copyFrom(address));
     builder.setAccountAddress(ByteString.copyFrom(address));
     builder.setPersonalInfo(info);
     builder.setType(AccountType.Normal);
