@@ -1239,11 +1239,11 @@ public class WalletApi {
       byte[] ownerAddress,
       long frozen_balance,
       int resourceCode,
-      ByteString assetName,
+      ByteString assertId,
       byte[] receiverAddress)
       throws CipherException, IOException, CancelException {
     Contract.FreezeBalanceContract contract =
-        createFreezeBalanceContract(ownerAddress, frozen_balance, resourceCode, assetName, receiverAddress);
+        createFreezeBalanceContract(ownerAddress, frozen_balance, resourceCode, assertId, receiverAddress);
     if (rpcVersion == 2) {
       TransactionExtention transactionExtention = rpcCli.createTransaction2(contract);
       return processTransactionExtention(transactionExtention);
@@ -1278,7 +1278,7 @@ public class WalletApi {
       byte[] address,
       long frozen_balance,
       int resourceCode,
-      ByteString assetName,
+      ByteString assertId,
       byte[] receiverAddress) {
     if (address == null) {
       address = getAddress();
@@ -1289,7 +1289,7 @@ public class WalletApi {
     builder
         .setOwnerAddress(byteAddress)
         .setFrozenBalance(frozen_balance)
-            .setAssetName(assetName)
+            .setAssetId(assertId)
         .setResourceValue(resourceCode);
 
     if (receiverAddress != null) {

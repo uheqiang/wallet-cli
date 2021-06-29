@@ -1,6 +1,7 @@
 package org.tron.issue;
 
 import com.google.protobuf.ByteString;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.tron.common.crypto.ECKey;
@@ -16,6 +17,7 @@ import org.tron.walletcli.WalletApiWrapper;
 import org.tron.walletserver.WalletApi;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * 资产发布、资产转移、能量兑换
@@ -69,13 +71,30 @@ public class AssetTests {
         System.out.println(JsonFormatUtil.formatJson(JsonFormat.printToString(nftCoin, true)));
     }
 
+    //增发资产
+    @Test
+    public void updateAsset() {
+
+    }
+
     //查询资产余额
     @Test
     public void queryBalance() {
+//        String address = "TMXnRunmpzLgdP4sG3mYMkZZ8Q6f9DV847";
         String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
         byte[] addr = WalletApi.decodeFromBase58Check(address);
         Protocol.Account account = WalletApi.queryAccount(addr);
         System.out.println(JsonFormatUtil.formatJson(JsonFormat.printToString(account, true)));
+
+        //trc10余额
+        String id = "1000001";
+        Map<String, Long> assetV2Map = account.getAssetV2Map();
+        long value = assetV2Map.get(id);
+        System.out.println("trc10 balance: " + value);
+
+        //能量余额
+        long energy = account.getAccountResource().getFrozenBalanceForEnergy().getFrozenBalance();
+        System.out.println("energy balance: " + energy);
     }
 
 
@@ -105,13 +124,13 @@ public class AssetTests {
     @Test
     public void exchangeFree() {
         //byte[] ownerAddress, long frozen_balance, int resourceCode, byte[] receiverAddress
-        String owner = "TMXnRunmpzLgdP4sG3mYMkZZ8Q6f9DV847";
+        String owner = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
         byte[] ownerAddress = WalletApi.decodeFromBase58Check(owner);
-        String assertName = "NFTCoin";
+        String assertId = "1000001";
         boolean result = false;
         try {
-            ByteString name = ByteString.copyFrom(assertName.getBytes());
-            result = walletApiWrapper.freezeBalance(ownerAddress, 5, name,ownerAddress);
+            ByteString id = ByteString.copyFrom(assertId.getBytes());
+            result = walletApiWrapper.freezeBalance(ownerAddress, 3, id, ownerAddress);
         } catch (CipherException | IOException | CancelException e) {
             e.printStackTrace();
         }

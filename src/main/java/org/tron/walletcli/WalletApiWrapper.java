@@ -472,11 +472,13 @@ public class WalletApiWrapper {
 
   /**
    * 冻结TRC10资源，获取能量
+   * 一个账户可以通过冻结TRC10来获取能量
+   * 同时，也可以把冻结TRC10获取的者能量委托（delegate）给其他地址
    * @param ownerAddress trc10拥有者
    * @param frozen_balance 冻结的trc10的数量
-   * @param receiverAddress 能量接收者
+   * @param receiverAddress 能量接收者，可以是自己，也可以是他人
    */
-  public boolean freezeBalance(byte[] ownerAddress, long frozen_balance, ByteString assertName, byte[] receiverAddress)
+  public boolean freezeBalance(byte[] ownerAddress, long frozen_balance, ByteString assertId, byte[] receiverAddress)
       throws CipherException, IOException, CancelException {
     if (wallet == null || !wallet.isLoginState()) {
       System.out.println("Warning: freezeBalance failed, Please login first !!");
@@ -486,7 +488,7 @@ public class WalletApiWrapper {
     return wallet.freezeBalance(ownerAddress,
             frozen_balance,
             Contract.ResourceCode.ENERGY_VALUE,
-            assertName,
+            assertId,
             receiverAddress);
   }
 
