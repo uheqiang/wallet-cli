@@ -673,15 +673,13 @@ public class WalletApi {
     return processTransaction(transaction);
   }
 
-  public boolean updateAsset(
-      byte[] owner, byte[] description, byte[] url, long newLimit, long newPublicLimit)
+  public boolean updateAsset(byte[] owner, String assetId, long mintTokens)
       throws CipherException, IOException, CancelException {
     if (owner == null) {
       owner = getAddress();
     }
 
-    Contract.UpdateAssetContract contract =
-        createUpdateAssetContract(owner, description, url, newLimit, newPublicLimit);
+    Contract.UpdateAssetContract contract = createUpdateAssetContract(owner, assetId, mintTokens);
     if (rpcVersion == 2) {
       TransactionExtention transactionExtention = rpcCli.createTransaction2(contract);
       return processTransactionExtention(transactionExtention);
@@ -921,16 +919,12 @@ public class WalletApi {
     return builder.build();
   }
 
-  public static Contract.UpdateAssetContract createUpdateAssetContract(
-      byte[] address, byte[] description, byte[] url, long newLimit, long newPublicLimit) {
+  public static Contract.UpdateAssetContract createUpdateAssetContract(byte[] address, String assetId, long mintTokens) {
     Contract.UpdateAssetContract.Builder builder = Contract.UpdateAssetContract.newBuilder();
-    ByteString basAddreess = ByteString.copyFrom(address);
-    builder.setDescription(ByteString.copyFrom(description));
-    builder.setUrl(ByteString.copyFrom(url));
-    builder.setNewLimit(newLimit);
-    builder.setNewPublicLimit(newPublicLimit);
-    builder.setOwnerAddress(basAddreess);
-
+    ByteString owner = ByteString.copyFrom(address);
+    builder.setOwnerAddress(owner);
+    builder.setAssetName(ByteString.copyFromUtf8(assetId));
+    builder.setMintTokens(mintTokens);
     return builder.build();
   }
 

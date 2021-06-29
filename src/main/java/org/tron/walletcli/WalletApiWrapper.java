@@ -460,14 +460,14 @@ public class WalletApiWrapper {
   }
 
 
-  public boolean updateAsset(byte[] ownerAddress, byte[] description, byte[] url, long newLimit,
-      long newPublicLimit) throws CipherException, IOException, CancelException {
+  public boolean updateAsset(byte[] ownerAddress, String assetId, long mintTokens)
+          throws CipherException, IOException, CancelException {
     if (wallet == null || !wallet.isLoginState()) {
       System.out.println("Warning: updateAsset failed, Please login first !!");
       return false;
     }
 
-    return wallet.updateAsset(ownerAddress, description, url, newLimit, newPublicLimit);
+    return wallet.updateAsset(ownerAddress,assetId, mintTokens);
   }
 
   /**

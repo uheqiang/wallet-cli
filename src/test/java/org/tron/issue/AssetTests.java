@@ -74,7 +74,20 @@ public class AssetTests {
     //增发资产
     @Test
     public void updateAsset() {
-
+        String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
+        byte[] addr = WalletApi.decodeFromBase58Check(address);
+        String assetId = "1000001";
+        boolean result = false;
+        try {
+            result = walletApiWrapper.updateAsset(addr, assetId, 46);
+        } catch (CipherException | IOException | CancelException e) {
+            e.printStackTrace();
+        }
+        if (result) {
+            System.out.println("CreateBusiness successful !!");
+        } else {
+            System.out.println("CreateBusiness failed !!");
+        }
     }
 
     //查询资产余额

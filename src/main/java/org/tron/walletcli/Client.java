@@ -561,13 +561,13 @@ public class Client {
     long newLimit = new Long(newLimitString);
     long newPublicLimit = new Long(newPublicLimitString);
 
-    boolean ret = walletApiWrapper
+    /*boolean ret = walletApiWrapper
         .updateAsset(ownerAddress, descriptionBytes, urlBytes, newLimit, newPublicLimit);
     if (ret) {
       System.out.println("Update Asset successful !!!!");
     } else {
       System.out.println("Update Asset failed !!!!");
-    }
+    }*/
   }
 
   private void getAssetIssueByAccount(String[] parameters) {
