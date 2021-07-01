@@ -728,8 +728,7 @@ public class WalletApiWrapper {
       return false;
     }
 
-    return wallet
-        .triggerContract(ownerAddress, contractAddress, callValue, data, feeLimit, tokenValue,
+    return wallet.triggerContract(ownerAddress, contractAddress, callValue, data, feeLimit, tokenValue,
             tokenId,
             isConstant);
   }

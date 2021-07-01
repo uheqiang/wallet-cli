@@ -14,6 +14,7 @@ import io.grpc.Status;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.spongycastle.util.Strings;
 import org.spongycastle.util.encoders.Hex;
 import org.tron.api.GrpcAPI;
 import org.tron.api.GrpcAPI.*;
@@ -468,7 +469,7 @@ public class WalletApi {
       return false;
     }
 
-    System.out.println(Utils.printTransactionExceptId(transactionExtention.getTransaction()));
+    //System.out.println(Utils.printTransactionExceptId(transactionExtention.getTransaction()));
     System.out.println("before sign transaction hex string is " + ByteArray.toHexString(transaction.toByteArray()));
     transaction = signTransaction(transaction);
     showTransactionAfterSign(transaction);
@@ -1833,12 +1834,10 @@ public class WalletApi {
     builder.setName(contractName);
     builder.setOriginAddress(ByteString.copyFrom(address));
     builder.setAbi(abi);
-    builder
-        .setConsumeUserResourcePercent(consumeUserResourcePercent)
-        .setOriginEnergyLimit(originEnergyLimit);
+//    builder.setConsumeUserResourcePercent(consumeUserResourcePercent);
+    builder.setOriginEnergyLimit(originEnergyLimit);
 
     if (value != 0) {
-
       builder.setCallValue(value);
     }
     byte[] byteCode;
@@ -2064,9 +2063,8 @@ public class WalletApi {
     texBuilder.setTxid(transactionExtention.getTxid());
     transactionExtention = texBuilder.build();
 
-    //    byte[] contractAddress = generateContractAddress(transactionExtention.getTransaction());
-    //    System.out.println(
-    //        "Your smart contract address will be: " + WalletApi.encode58Check(contractAddress));
+    byte[] contractAddress = generateContractAddress(owner,transactionExtention.getTransaction());
+    System.out.println("Your smart contract address will be: " + WalletApi.encode58Check(contractAddress));
     return processTransactionExtention(transactionExtention);
   }
 
@@ -2084,8 +2082,7 @@ public class WalletApi {
       owner = getAddress();
     }
 
-    Contract.TriggerSmartContract triggerContract =
-        triggerCallContract(owner, contractAddress, callValue, data, tokenValue, tokenId);
+    Contract.TriggerSmartContract triggerContract = triggerCallContract(owner, contractAddress, callValue, data, tokenValue, tokenId);
     TransactionExtention transactionExtention;
     if (isConstant) {
       transactionExtention = rpcCli.triggerConstantContract(triggerContract);
@@ -2096,8 +2093,7 @@ public class WalletApi {
     if (transactionExtention == null || !transactionExtention.getResult().getResult()) {
       System.out.println("RPC create call trx failed!");
       System.out.println("Code = " + transactionExtention.getResult().getCode());
-      System.out.println(
-          "Message = " + transactionExtention.getResult().getMessage().toStringUtf8());
+      System.out.println("Message = " + transactionExtention.getResult().getMessage().toStringUtf8());
       return false;
     }
 
@@ -2108,16 +2104,15 @@ public class WalletApi {
         && transactionExtention.getResult() != null) {
       byte[] result = transactionExtention.getConstantResult(0).toByteArray();
       System.out.println("message:" + transaction.getRet(0).getRet());
-      System.out.println(
-          ":" + ByteArray.toStr(transactionExtention.getResult().getMessage().toByteArray()));
-      System.out.println("Result:" + Hex.toHexString(result));
+      //System.out.println(":" + ByteArray.toStr(transactionExtention.getResult().getMessage().toByteArray()));
+      //System.out.println("Result:" + Hex.toHexString(result));
+      System.out.println("Result:" + Strings.fromByteArray(result).trim());
       return true;
     }
 
     TransactionExtention.Builder texBuilder = TransactionExtention.newBuilder();
     Transaction.Builder transBuilder = Transaction.newBuilder();
-    Transaction.raw.Builder rawBuilder =
-        transactionExtention.getTransaction().getRawData().toBuilder();
+    Transaction.raw.Builder rawBuilder = transactionExtention.getTransaction().getRawData().toBuilder();
     rawBuilder.setFeeLimit(feeLimit);
     transBuilder.setRawData(rawBuilder);
     for (int i = 0; i < transactionExtention.getTransaction().getSignatureCount(); i++) {
@@ -2142,8 +2137,7 @@ public class WalletApi {
 
   public boolean accountPermissionUpdate(byte[] owner, String permissionJson)
       throws CipherException, IOException, CancelException {
-    Contract.AccountPermissionUpdateContract contract =
-        createAccountPermissionContract(owner, permissionJson);
+    Contract.AccountPermissionUpdateContract contract = createAccountPermissionContract(owner, permissionJson);
     TransactionExtention transactionExtention = rpcCli.accountPermissionUpdate(contract);
     return processTransactionExtention(transactionExtention);
   }

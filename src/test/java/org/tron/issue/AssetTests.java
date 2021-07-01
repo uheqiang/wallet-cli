@@ -79,7 +79,7 @@ public class AssetTests {
         String assetId = "1000001";
         boolean result = false;
         try {
-            result = walletApiWrapper.updateAsset(addr, assetId, 46);
+            result = walletApiWrapper.updateAsset(addr, assetId, 99999999L);
         } catch (CipherException | IOException | CancelException e) {
             e.printStackTrace();
         }
@@ -143,7 +143,7 @@ public class AssetTests {
         boolean result = false;
         try {
             ByteString id = ByteString.copyFrom(assertId.getBytes());
-            result = walletApiWrapper.freezeBalance(ownerAddress, 3, id, ownerAddress);
+            result = walletApiWrapper.freezeBalance(ownerAddress, 999999, id, ownerAddress);
         } catch (CipherException | IOException | CancelException e) {
             e.printStackTrace();
         }
