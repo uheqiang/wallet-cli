@@ -687,13 +687,13 @@ public class WalletApi {
     }
   }
 
-  public boolean transferAsset(byte[] owner, byte[] to, byte[] assertName, long amount)
+  public boolean transferAsset(byte[] owner, byte[] to, byte[] assertId, long amount)
       throws CipherException, IOException, CancelException {
     if (owner == null) {
       owner = getAddress();
     }
 
-    Contract.TransferAssetContract contract = createTransferAssetContract(to, assertName, owner, amount);
+    Contract.TransferAssetContract contract = createTransferAssetContract(to, assertId, owner, amount);
     if (rpcVersion == 2) {
       TransactionExtention transactionExtention = rpcCli.createTransferAssetTransaction2(contract);
       return processTransactionExtention(transactionExtention);
@@ -867,13 +867,13 @@ public class WalletApi {
   }
 
   public static Contract.TransferAssetContract createTransferAssetContract(
-      byte[] to, byte[] assertName, byte[] owner, long amount) {
+      byte[] to, byte[] assertId, byte[] owner, long amount) {
     Contract.TransferAssetContract.Builder builder = Contract.TransferAssetContract.newBuilder();
     ByteString bsTo = ByteString.copyFrom(to);
-    ByteString bsName = ByteString.copyFrom(assertName);
+    ByteString bsId = ByteString.copyFrom(assertId);
     ByteString bsOwner = ByteString.copyFrom(owner);
     builder.setToAddress(bsTo);
-    builder.setAssetName(bsName);
+    builder.setAssetName(bsId);
     builder.setOwnerAddress(bsOwner);
     builder.setAmount(amount);
 

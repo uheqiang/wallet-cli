@@ -175,15 +175,14 @@ public class WalletApiWrapper {
     return wallet.sendCoin(ownerAddress, toAddress, amount);
   }
 
-  public boolean transferAsset(byte[] ownerAddress, byte[] toAddress, String assertName,
-      long amount)
-      throws IOException, CipherException, CancelException {
+  public boolean transferAsset(byte[] ownerAddress, byte[] toAddress, String assertId, long amount)
+          throws IOException, CipherException, CancelException {
     if (wallet == null || !wallet.isLoginState()) {
       System.out.println("Warning: TransferAsset failed,  Please login first !!");
       return false;
     }
 
-    return wallet.transferAsset(ownerAddress, toAddress, assertName.getBytes(), amount);
+    return wallet.transferAsset(ownerAddress, toAddress, assertId.getBytes(), amount);
   }
 
   public boolean participateAssetIssue(byte[] ownerAddress, byte[] toAddress, String assertName,
@@ -201,10 +200,9 @@ public class WalletApiWrapper {
    * 发布资产，可以是商家发布Token
    * @param ownerAddress token拥有者
    * @param name token名称
-   * @param abbrName token简称
    * @param totalSupply token发布总量
    */
-  public boolean assetIssue(byte[] ownerAddress, String name, String abbrName, long totalSupply
+  public boolean assetIssue(byte[] ownerAddress, String name/*, String abbrName*/, long totalSupply
           /*,int trxNum, int icoNum, int precision, long startTime, long endTime, int voteScore,
       String description, String url, long freeNetLimit, long publicFreeNetLimit,
       HashMap<String, String> frozenSupply*/) throws CipherException, IOException, CancelException {
@@ -220,7 +218,7 @@ public class WalletApiWrapper {
     }
     builder.setOwnerAddress(ByteString.copyFrom(ownerAddress));
     builder.setName(ByteString.copyFrom(name.getBytes()));
-    builder.setAbbr(ByteString.copyFrom(abbrName.getBytes()));
+    //builder.setAbbr(ByteString.copyFrom(abbrName.getBytes()));
 
     if (totalSupply <= 0) {
       System.out.println("totalSupply should greater than 0. but really is " + totalSupply);

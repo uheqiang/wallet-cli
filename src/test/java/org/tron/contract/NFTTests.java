@@ -19,7 +19,7 @@ import java.util.List;
  * @author Brian
  * @date 2021/6/28 16:25
  */
-public class ContractTests {
+public class NFTTests {
 
     private WalletApiWrapper walletApiWrapper = new WalletApiWrapper();
 

@@ -3,14 +3,17 @@ package org.tron.account;
 import org.junit.Before;
 import org.junit.Test;
 import org.tron.common.crypto.ECKey;
+import org.tron.common.entity.AccountInfo;
 import org.tron.common.utils.ByteArray;
 import org.tron.common.utils.JsonFormat;
 import org.tron.common.utils.JsonFormatUtil;
 import org.tron.common.utils.Utils;
 import org.tron.core.exception.CancelException;
 import org.tron.core.exception.CipherException;
+import org.tron.core.exception.TronException;
 import org.tron.protos.Protocol;
 import org.tron.walletcli.WalletApiWrapper;
+import org.tron.walletcli.WalletClient;
 import org.tron.walletserver.WalletApi;
 
 import java.io.IOException;
@@ -65,9 +68,18 @@ public class AccountTests {
     @Test
     public void queryAccountPersonal(){
         String address = "TMXnRunmpzLgdP4sG3mYMkZZ8Q6f9DV847";
-        byte[] addr = WalletApi.decodeFromBase58Check(address);
-        Protocol.Account account = WalletApi.queryAccount(addr);
-        System.out.println(JsonFormatUtil.formatJson(JsonFormat.printToString(account, true)));
+        address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
+        address = "TWKbzhEugLfinaKTCrtpZBLvMF588rkY6q";
+//        byte[] addr = WalletApi.decodeFromBase58Check(address);
+//        Protocol.Account account = WalletApi.queryAccount(addr);
+//        System.out.println(JsonFormatUtil.formatJson(JsonFormat.printToString(account, true)));
+
+        try {
+            AccountInfo account1 = new WalletClient().getAccount(address);
+            System.out.println(account1.toString());
+        } catch (TronException e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -49,7 +49,7 @@ public class AssetTests {
         //privateKey:0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda
         boolean result = false;
         try {
-            result = walletApiWrapper.assetIssue(/*ownerAddress*/null,"NFTCoin", "nft", 1000);
+            result = walletApiWrapper.assetIssue(/*ownerAddress*/null,"NFTCoin", /*"nft",*/ 1000);
         } catch (CipherException | IOException | CancelException e) {
             e.printStackTrace();
         }
@@ -93,8 +93,9 @@ public class AssetTests {
     //查询资产余额
     @Test
     public void queryBalance() {
-//        String address = "TMXnRunmpzLgdP4sG3mYMkZZ8Q6f9DV847";
-        String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
+        String address = "";
+        address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
+        address = "TMXnRunmpzLgdP4sG3mYMkZZ8Q6f9DV847";
         byte[] addr = WalletApi.decodeFromBase58Check(address);
         Protocol.Account account = WalletApi.queryAccount(addr);
         System.out.println(JsonFormatUtil.formatJson(JsonFormat.printToString(account, true)));
@@ -118,7 +119,7 @@ public class AssetTests {
         String to = "TMXnRunmpzLgdP4sG3mYMkZZ8Q6f9DV847";
         String assertName = "NFTCoin";
         String assertId = "1000001";
-        long num = 11;
+        long num = 13;
         boolean result = false;
         try {
             result = walletApiWrapper.transferAsset(WalletApi.decodeFromBase58Check(owner),
