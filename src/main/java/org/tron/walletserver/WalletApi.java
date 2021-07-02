@@ -23,10 +23,7 @@ import org.tron.common.crypto.ECKey;
 import org.tron.common.crypto.Hash;
 import org.tron.common.crypto.Sha256Sm3Hash;
 import org.tron.common.crypto.sm2.SM2;
-import org.tron.common.utils.Base58;
-import org.tron.common.utils.ByteArray;
-import org.tron.common.utils.TransactionUtils;
-import org.tron.common.utils.Utils;
+import org.tron.common.utils.*;
 import org.tron.core.config.Configuration;
 import org.tron.core.config.Parameter.CommonConstant;
 import org.tron.core.exception.CancelException;
@@ -1908,12 +1905,14 @@ public class WalletApi {
       long callValue,
       byte[] data,
       long tokenValue,
-      String tokenId) {
+      String tokenId,
+      long originEnergyLimit) {
     Contract.TriggerSmartContract.Builder builder = Contract.TriggerSmartContract.newBuilder();
     builder.setOwnerAddress(ByteString.copyFrom(address));
     builder.setContractAddress(ByteString.copyFrom(contractAddress));
     builder.setData(ByteString.copyFrom(data));
     builder.setCallValue(callValue);
+    builder.setOriginEnergyLimit(originEnergyLimit);
     if (tokenId != null && tokenId != "") {
       builder.setCallTokenValue(tokenValue);
       builder.setTokenId(Long.parseLong(tokenId));
@@ -2076,13 +2075,15 @@ public class WalletApi {
       long feeLimit,
       long tokenValue,
       String tokenId,
+      long originEnergyLimit,
       boolean isConstant)
       throws IOException, CipherException, CancelException {
     if (owner == null) {
       owner = getAddress();
     }
 
-    Contract.TriggerSmartContract triggerContract = triggerCallContract(owner, contractAddress, callValue, data, tokenValue, tokenId);
+    Contract.TriggerSmartContract triggerContract = triggerCallContract(owner, contractAddress, callValue,
+            data, tokenValue, tokenId ,originEnergyLimit);
     TransactionExtention transactionExtention;
     if (isConstant) {
       transactionExtention = rpcCli.triggerConstantContract(triggerContract);
@@ -2107,6 +2108,7 @@ public class WalletApi {
       //System.out.println(":" + ByteArray.toStr(transactionExtention.getResult().getMessage().toByteArray()));
       //System.out.println("Result:" + Hex.toHexString(result));
       System.out.println("Result:" + Strings.fromByteArray(result).trim());
+      System.out.println("Result:" + ByteUtil.bytesToBigInteger(result));
       return true;
     }
 

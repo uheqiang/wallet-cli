@@ -252,7 +252,7 @@ public class WalletClient {
         byte[] input = Hex.decode(AbiUtil.parseMethod(methodStr, argsStr, isHex));
         byte[] contractAddress = WalletApi.decodeFromBase58Check(contractAddrStr);
 
-        boolean result = walletApiWrapper
+        /*boolean result = walletApiWrapper
                 .callContract(ownerAddress, contractAddress, callValue, input, feeLimit, tokenCallValue,
                         tokenId,
                         isConstant);
@@ -263,6 +263,6 @@ public class WalletClient {
             } else {
                 System.out.println("Broadcast the " + cmdMethodStr + " failed");
             }
-        }
+        }*/
     }
 }

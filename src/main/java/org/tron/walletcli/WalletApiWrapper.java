@@ -721,7 +721,7 @@ public class WalletApiWrapper {
 
   public boolean callContract(byte[] ownerAddress, byte[] contractAddress, long callValue,
       byte[] data, long feeLimit,
-      long tokenValue, String tokenId, boolean isConstant)
+      long tokenValue, String tokenId, long originEnergyLimit, boolean isConstant)
       throws CipherException, IOException, CancelException {
     if (wallet == null || !wallet.isLoginState()) {
       System.out.println("Warning: callContract failed,  Please login first !!");
@@ -729,8 +729,7 @@ public class WalletApiWrapper {
     }
 
     return wallet.triggerContract(ownerAddress, contractAddress, callValue, data, feeLimit, tokenValue,
-            tokenId,
-            isConstant);
+            tokenId, originEnergyLimit, isConstant);
   }
 
   public boolean accountPermissionUpdate(byte[] ownerAddress, String permission)

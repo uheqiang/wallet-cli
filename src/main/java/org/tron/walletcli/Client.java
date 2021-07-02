@@ -2073,67 +2073,67 @@ public class Client {
       throws IOException, CipherException, CancelException, EncodingException {
     String cmdMethodStr = isConstant ? "TriggerConstantContract" : "TriggerContract";
 
-    if (isConstant) {
-      if (parameters == null || (parameters.length != 4 && parameters.length != 5)) {
-        System.out.println(cmdMethodStr + " needs 4 or 5 parameters like: ");
-        System.out.println(cmdMethodStr + " [OwnerAddress] contractAddress method args isHex");
-        return;
-      }
-    } else {
-      if (parameters == null || (parameters.length != 8 && parameters.length != 9)) {
-        System.out.println(cmdMethodStr + " needs 8 or 9 parameters like: ");
-        System.out.println(cmdMethodStr + " [OwnerAddress] contractAddress method args isHex"
-            + " fee_limit value token_value token_id(e.g: TRXTOKEN, use # if don't provided)");
-        return;
-      }
-    }
-
-    int index = 0;
-    byte[] ownerAddress = null;
-    if (parameters.length == 5 || parameters.length == 9) {
-      ownerAddress = WalletApi.decodeFromBase58Check(parameters[index++]);
-      if (ownerAddress == null) {
-        System.out.println("Invalid OwnerAddress.");
-        return;
-      }
-    }
-
-    String contractAddrStr = parameters[index++];
-    String methodStr = parameters[index++];
-    String argsStr = parameters[index++];
-    boolean isHex = Boolean.valueOf(parameters[index++]);
-    long feeLimit = 0;
-    long callValue = 0;
-    long tokenCallValue = 0;
-    String tokenId = "";
-
-    if (!isConstant) {
-      feeLimit = Long.valueOf(parameters[index++]);
-      callValue = Long.valueOf(parameters[index++]);
-      tokenCallValue = Long.valueOf(parameters[index++]);
-      tokenId = parameters[index++];
-    }
-    if (argsStr.equalsIgnoreCase("#")) {
-      argsStr = "";
-    }
-    if (tokenId.equalsIgnoreCase("#")) {
-      tokenId = "";
-    }
-    byte[] input = Hex.decode(AbiUtil.parseMethod(methodStr, argsStr, isHex));
-    byte[] contractAddress = WalletApi.decodeFromBase58Check(contractAddrStr);
-
-    boolean result = walletApiWrapper
-        .callContract(ownerAddress, contractAddress, callValue, input, feeLimit, tokenCallValue,
-            tokenId,
-            isConstant);
-    if (!isConstant) {
-      if (result) {
-        System.out.println("Broadcast the " + cmdMethodStr + " successful.\n"
-            + "Please check the given transaction id to get the result on blockchain using getTransactionInfoById command");
-      } else {
-        System.out.println("Broadcast the " + cmdMethodStr + " failed");
-      }
-    }
+//    if (isConstant) {
+//      if (parameters == null || (parameters.length != 4 && parameters.length != 5)) {
+//        System.out.println(cmdMethodStr + " needs 4 or 5 parameters like: ");
+//        System.out.println(cmdMethodStr + " [OwnerAddress] contractAddress method args isHex");
+//        return;
+//      }
+//    } else {
+//      if (parameters == null || (parameters.length != 8 && parameters.length != 9)) {
+//        System.out.println(cmdMethodStr + " needs 8 or 9 parameters like: ");
+//        System.out.println(cmdMethodStr + " [OwnerAddress] contractAddress method args isHex"
+//            + " fee_limit value token_value token_id(e.g: TRXTOKEN, use # if don't provided)");
+//        return;
+//      }
+//    }
+//
+//    int index = 0;
+//    byte[] ownerAddress = null;
+//    if (parameters.length == 5 || parameters.length == 9) {
+//      ownerAddress = WalletApi.decodeFromBase58Check(parameters[index++]);
+//      if (ownerAddress == null) {
+//        System.out.println("Invalid OwnerAddress.");
+//        return;
+//      }
+//    }
+//
+//    String contractAddrStr = parameters[index++];
+//    String methodStr = parameters[index++];
+//    String argsStr = parameters[index++];
+//    boolean isHex = Boolean.valueOf(parameters[index++]);
+//    long feeLimit = 0;
+//    long callValue = 0;
+//    long tokenCallValue = 0;
+//    String tokenId = "";
+//
+//    if (!isConstant) {
+//      feeLimit = Long.valueOf(parameters[index++]);
+//      callValue = Long.valueOf(parameters[index++]);
+//      tokenCallValue = Long.valueOf(parameters[index++]);
+//      tokenId = parameters[index++];
+//    }
+//    if (argsStr.equalsIgnoreCase("#")) {
+//      argsStr = "";
+//    }
+//    if (tokenId.equalsIgnoreCase("#")) {
+//      tokenId = "";
+//    }
+//    byte[] input = Hex.decode(AbiUtil.parseMethod(methodStr, argsStr, isHex));
+//    byte[] contractAddress = WalletApi.decodeFromBase58Check(contractAddrStr);
+//
+//    boolean result = walletApiWrapper
+//        .callContract(ownerAddress, contractAddress, callValue, input, feeLimit, tokenCallValue,
+//            tokenId,
+//            isConstant);
+//    if (!isConstant) {
+//      if (result) {
+//        System.out.println("Broadcast the " + cmdMethodStr + " successful.\n"
+//            + "Please check the given transaction id to get the result on blockchain using getTransactionInfoById command");
+//      } else {
+//        System.out.println("Broadcast the " + cmdMethodStr + " failed");
+//      }
+//    }
   }
 
   private void getContract(String[] parameters) {
