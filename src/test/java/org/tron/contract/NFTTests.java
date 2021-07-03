@@ -117,8 +117,8 @@ public class NFTTests {
         String tokenId = "0";
         String method;
         method = "symbol()";
-        method = "totalSupply()";
         method = "name()";
+        method = "totalSupply()";
         String argsStr = "";
 
         /*method = "tokenURI(uint256)";

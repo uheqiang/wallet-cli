@@ -717,6 +717,14 @@ public class WalletApiWrapper {
             libraryAddressPair, compilerVersion);
   }
 
+  public byte[] triggerConstantContract(byte[] owner, byte[] contractAddress, byte[] data) {
+    if (wallet == null || !wallet.isLoginState()) {
+      System.out.println("Warning: callContract failed,  Please login first !!");
+      return null;
+    }
+    return wallet.triggerConstantContract(owner,contractAddress,data);
+  }
+
   public boolean callContract(byte[] ownerAddress, byte[] contractAddress, long callValue,
       byte[] data, long feeLimit,
       long tokenValue, String tokenId, long originEnergyLimit, boolean isConstant)

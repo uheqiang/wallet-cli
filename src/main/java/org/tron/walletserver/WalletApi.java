@@ -8,6 +8,7 @@ import com.google.gson.JsonParser;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.sun.org.apache.bcel.internal.generic.RETURN;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
 import io.grpc.Status;
@@ -55,6 +56,8 @@ public class WalletApi {
   private static byte[] password;
   // appId 商家 或 称为可信节点ID
   private static String appId;
+  private static String contractAbi;
+  private static String contractCode;
 
   private static GrpcClient rpcCli = init();
 
@@ -90,6 +93,14 @@ public class WalletApi {
       String pwd = config.getString("pwd");
       password = org.tron.keystore.StringUtils.char2Byte(pwd.toCharArray());
 //      password = pwd.getBytes();
+    }
+
+    if (config.hasPath("contract.abi")) {
+      contractAbi = config.getString("contract.abi");
+    }
+
+    if (config.hasPath("contract.code")) {
+      contractCode = config.getString("contract.code");
     }
     return new GrpcClient(fullNode, solidityNode);
   }
@@ -1821,11 +1832,13 @@ public class WalletApi {
       String tokenId,
       String libraryAddressPair,
       String compilerVersion) {
-    SmartContract.ABI abi = jsonStr2ABI(ABI);
-    if (abi == null) {
-      System.out.println("abi is null");
-      return null;
+    if (StringUtils.isEmpty(ABI)) {
+      ABI = Objects.requireNonNull(contractAbi);
     }
+    if (StringUtils.isEmpty(code)) {
+      code = Objects.requireNonNull(contractCode);
+    }
+    SmartContract.ABI abi = Objects.requireNonNull(jsonStr2ABI(ABI),"Contact abi parse failure !!!");
 
     SmartContract.Builder builder = SmartContract.newBuilder();
     builder.setName(contractName);
@@ -2067,6 +2080,43 @@ public class WalletApi {
     return processTransactionExtention(transactionExtention);
   }
 
+  public byte[] triggerConstantContract(byte[] owner, byte[] contractAddress, byte[] data) {
+    byte[] result = new byte[0];
+    Contract.TriggerSmartContract triggerContract = triggerCallContract(owner, contractAddress, 0L,
+            data, 0L, "0", 0L);
+    TransactionExtention transactionExtention = rpcCli.triggerConstantContract(triggerContract);
+    if (transactionExtention == null || !transactionExtention.getResult().getResult()) {
+      //System.out.println("RPC create call trx failed!");
+      //System.out.println("Code = " + transactionExtention.getResult().getCode());
+      //System.out.println("Message = " + transactionExtention.getResult().getMessage().toStringUtf8());
+      return result;
+    }
+    Transaction transaction = transactionExtention.getTransaction();
+    // for constant
+    if (transaction.getRetCount() != 0
+            && transactionExtention.getConstantResult(0) != null
+            && transactionExtention.getResult() != null) {
+      //result = transactionExtention.getConstantResult(0).toByteArray();
+      //System.out.println("message:" + transaction.getRet(0).getRet());
+      //System.out.println(":" + ByteArray.toStr(transactionExtention.getResult().getMessage().toByteArray()));
+      //System.out.println("Result:" + Hex.toHexString(result));
+      //System.out.println("Result:" + Strings.fromByteArray(result).trim());
+      //System.out.println("Result:" + ByteUtil.bytesToBigInteger(result));
+      return transactionExtention.getConstantResult(0).toByteArray();
+    }
+    return result;
+  }
+
+  public boolean triggerContract(
+          byte[] owner,
+          byte[] contractAddress,
+          byte[] data,
+          long originEnergyLimit)
+          throws IOException, CipherException, CancelException {
+    return triggerContract(owner,contractAddress,
+            0L,data,0L,0L,
+            "0",originEnergyLimit,true);
+  }
   public boolean triggerContract(
       byte[] owner,
       byte[] contractAddress,
