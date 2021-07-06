@@ -106,7 +106,7 @@ public class WalletApiWrapper {
 //    char[] password = Utils.inputPassword(false);
 //    byte[] passwd = StringUtils.char2Byte(password);
 //    StringUtils.clear(password);
-    wallet.checkPassword();
+//    wallet.checkPassword();
 //    StringUtils.clear(passwd);
 
     if (wallet == null) {
@@ -175,14 +175,9 @@ public class WalletApiWrapper {
     return wallet.sendCoin(ownerAddress, toAddress, amount);
   }
 
-  public boolean transferAsset(byte[] ownerAddress, byte[] toAddress, String assertId, long amount)
+  public boolean transferAsset(byte[] ownerAddress, byte[] fromPrivateKey, byte[] toAddress, String assertId, long amount)
           throws IOException, CipherException, CancelException {
-    if (wallet == null || !wallet.isLoginState()) {
-      System.out.println("Warning: TransferAsset failed,  Please login first !!");
-      return false;
-    }
-
-    return wallet.transferAsset(ownerAddress, toAddress, assertId.getBytes(), amount);
+    return wallet.transferAsset(ownerAddress, fromPrivateKey, toAddress, assertId.getBytes(), amount);
   }
 
   public boolean participateAssetIssue(byte[] ownerAddress, byte[] toAddress, String assertName,
@@ -199,18 +194,12 @@ public class WalletApiWrapper {
   /**
    * 发布资产，可以是商家发布Token
    * @param ownerAddress token拥有者
+   * @param ownerPriKey owner的私钥
    * @param name token名称
    * @param totalSupply token发布总量
    */
-  public boolean assetIssue(byte[] ownerAddress, String name/*, String abbrName*/, long totalSupply
-          /*,int trxNum, int icoNum, int precision, long startTime, long endTime, int voteScore,
-      String description, String url, long freeNetLimit, long publicFreeNetLimit,
-      HashMap<String, String> frozenSupply*/) throws CipherException, IOException, CancelException {
-    if (wallet == null || !wallet.isLoginState()) {
-      System.out.println("Warning: assetIssue failed,  Please login first !!");
-      return false;
-    }
-
+  public boolean assetIssue(byte[] ownerAddress, byte[] ownerPriKey, String name, long totalSupply)
+          throws CipherException, IOException, CancelException {
     Contract.AssetIssueContract.Builder builder = Contract.AssetIssueContract.newBuilder();
     if (ownerAddress == null) {
       ownerAddress = wallet.getAddress();
@@ -218,85 +207,23 @@ public class WalletApiWrapper {
     }
     builder.setOwnerAddress(ByteString.copyFrom(ownerAddress));
     builder.setName(ByteString.copyFrom(name.getBytes()));
-    //builder.setAbbr(ByteString.copyFrom(abbrName.getBytes()));
 
     if (totalSupply <= 0) {
       System.out.println("totalSupply should greater than 0. but really is " + totalSupply);
       return false;
     }
     builder.setTotalSupply(totalSupply);
-
-    /*if (trxNum <= 0) {
-      System.out.println("trxNum should greater than 0. but really is " + trxNum);
-      return false;
-    }
-    builder.setTrxNum(trxNum);
-
-    if (icoNum <= 0) {
-      System.out.println("num should greater than 0. but really is " + icoNum);
-      return false;
-    }
-    builder.setNum(icoNum);
-
-    if (precision < 0) {
-      System.out.println("precision should greater or equal to 0. but really is " + precision);
-      return false;
-    }
-    builder.setPrecision(precision);*/
-
-    /*long now = System.currentTimeMillis();
-    if (startTime <= now) {
-      System.out.println("startTime should greater than now. but really is startTime("
-          + startTime + ") now(" + now + ")");
-      return false;
-    }
-    if (endTime <= startTime) {
-      System.out.println("endTime should greater or equal to startTime. but really is endTime("
-          + endTime + ") startTime(" + startTime + ")");
-      return false;
-    }
-
-    if (freeNetLimit < 0) {
-      System.out.println("freeAssetNetLimit should greater or equal to 0. but really is "
-          + freeNetLimit);
-      return false;
-    }
-    if (publicFreeNetLimit < 0) {
-      System.out.println("publicFreeAssetNetLimit should greater or equal to 0. but really is "
-          + publicFreeNetLimit);
-      return false;
-    }*/
-
-//    builder.setStartTime(startTime);
-//    builder.setEndTime(endTime);
-//    builder.setVoteScore(voteScore);
-//    builder.setDescription(ByteString.copyFrom(description.getBytes()));
-//    builder.setUrl(ByteString.copyFrom(url.getBytes()));
-//    builder.setFreeAssetNetLimit(freeNetLimit);
-//    builder.setPublicFreeAssetNetLimit(publicFreeNetLimit);
-
-//    for (String daysStr : frozenSupply.keySet()) {
-//      String amountStr = frozenSupply.get(daysStr);
-//      long amount = Long.parseLong(amountStr);
-//      long days = Long.parseLong(daysStr);
-//      Contract.AssetIssueContract.FrozenSupply.Builder frozenSupplyBuilder
-//          = Contract.AssetIssueContract.FrozenSupply.newBuilder();
-//      frozenSupplyBuilder.setFrozenAmount(amount);
-//      frozenSupplyBuilder.setFrozenDays(days);
-//      builder.addFrozenSupply(frozenSupplyBuilder.build());
-//    }
-
-    return wallet.createAssetIssue(builder.build());
+    return wallet.createAssetIssue(builder.build(), ownerPriKey);
   }
 
-  public boolean createAccount(byte[] address, String identity)
+  public boolean createAccount(byte[] owner, byte[] ownerPrivateKey, byte[] address, String identity)
       throws CipherException, IOException, CancelException {
     if (wallet == null || !wallet.isLoginState()) {
       System.out.println("Warning: createAccount failed,  Please login first !!");
       return false;
     }
 
-    return wallet.createAccount(null, address, identity);
+    return wallet.createAccount(owner, ownerPrivateKey, address, identity);
   }
 
   public boolean createBusiness() throws CipherException, IOException, CancelException {
@@ -473,17 +400,15 @@ public class WalletApiWrapper {
    * 一个账户可以通过冻结TRC10来获取能量
    * 同时，也可以把冻结TRC10获取的者能量委托（delegate）给其他地址
    * @param ownerAddress trc10拥有者
+   * @param ownerPrivateKey 拥有者的私钥
    * @param frozen_balance 冻结的trc10的数量
    * @param receiverAddress 能量接收者，可以是自己，也可以是他人
    */
-  public boolean freezeBalance(byte[] ownerAddress, long frozen_balance, ByteString assertId, byte[] receiverAddress)
+  public boolean freezeBalance(byte[] ownerAddress, byte[] ownerPrivateKey, long frozen_balance,
+                               ByteString assertId, byte[] receiverAddress)
       throws CipherException, IOException, CancelException {
-    if (wallet == null || !wallet.isLoginState()) {
-      System.out.println("Warning: freezeBalance failed, Please login first !!");
-      return false;
-    }
-
     return wallet.freezeBalance(ownerAddress,
+            ownerPrivateKey,
             frozen_balance,
             Contract.ResourceCode.ENERGY_VALUE,
             assertId,
@@ -703,26 +628,22 @@ public class WalletApiWrapper {
     return wallet.clearContractABI(ownerAddress, contractAddress);
   }
 
-  public boolean deployContract(byte[] ownerAddress, String name, String abiStr, String codeStr,
+  public boolean deployContract(byte[] ownerAddress, byte[] ownerPrivatekey, String name, String abiStr, String codeStr,
       long feeLimit, long value, long consumeUserResourcePercent, long originEnergyLimit,
       long tokenValue, String tokenId, String libraryAddressPair, String compilerVersion)
       throws CipherException, IOException, CancelException {
-    if (wallet == null || !wallet.isLoginState()) {
-      System.out.println("Warning: createContract failed,  Please login first !!");
-      return false;
-    }
-    return wallet.deployContract(ownerAddress, name, abiStr, codeStr, feeLimit, value,
-            consumeUserResourcePercent,
-            originEnergyLimit, tokenValue, tokenId,
+    return wallet.deployContract(ownerAddress, ownerPrivatekey, name, abiStr, codeStr, feeLimit, value,
+            consumeUserResourcePercent, originEnergyLimit, tokenValue, tokenId,
             libraryAddressPair, compilerVersion);
   }
 
   public byte[] triggerConstantContract(byte[] owner, byte[] contractAddress, byte[] data) {
-    if (wallet == null || !wallet.isLoginState()) {
-      System.out.println("Warning: callContract failed,  Please login first !!");
-      return null;
-    }
     return wallet.triggerConstantContract(owner,contractAddress,data);
+  }
+
+  public boolean triggerContract(byte[] owner, byte[] ownerPrivateKey, byte[] contractAddress, byte[] data)
+          throws CipherException, IOException, CancelException {
+    return wallet.triggerContract(owner, ownerPrivateKey, contractAddress, data,100000L);
   }
 
   public boolean callContract(byte[] ownerAddress, byte[] contractAddress, long callValue,
@@ -733,7 +654,6 @@ public class WalletApiWrapper {
       System.out.println("Warning: callContract failed,  Please login first !!");
       return false;
     }
-
     return wallet.triggerContract(ownerAddress, contractAddress, callValue, data, feeLimit, tokenValue,
             tokenId, originEnergyLimit, isConstant);
   }

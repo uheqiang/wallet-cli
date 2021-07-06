@@ -49,11 +49,11 @@ public class AccountTests {
         //0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda
         String identity = "2";
         boolean result = false;
-        try {
-            result = walletApiWrapper.createAccount(address/*WalletApi.decodeFromBase58Check(addressSt)*/, identity);
+        /*try {
+            result = walletApiWrapper.createAccount(address*//*WalletApi.decodeFromBase58Check(addressSt)*//*, identity);
         } catch (CipherException | IOException | CancelException e) {
             e.printStackTrace();
-        }
+        }*/
         if (result) {
             System.out.println("CreateAccount successful !!");
         } else {

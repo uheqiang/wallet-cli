@@ -62,12 +62,12 @@ public class NFTTests {
         String constructorStr = "constructor(string,string)";
         codeStr += Hex.toHexString(AbiUtil.encodeInput(constructorStr, argsStr));
         boolean result = false;
-        try {
+        /*try {
             result = walletApiWrapper.deployContract(addr,name,abiStr,codeStr,feeLimit,value,
                     consumeUserResourcePercent,originEnergyLimit,tokenValue,tokenId,libraryAddressPair,compilerVersion);
         } catch (CipherException | IOException | CancelException e) {
             e.printStackTrace();
-        }
+        }*/
         if (result) {
             System.out.println("Create contract successful !!");
         } else {

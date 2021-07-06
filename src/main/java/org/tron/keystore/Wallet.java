@@ -276,6 +276,18 @@ public class Wallet {
     return sm2;
   }
 
+  public static ECKey decrypt(byte[] privateKey) {
+    ECKey ecKey = ECKey.fromPrivate(privateKey);
+    StringUtils.clear(privateKey);
+    return ecKey;
+  }
+
+  public static SM2 decryptSM2(byte[] privateKey) {
+    SM2 sm2 = SM2.fromPrivate(privateKey);
+    StringUtils.clear(privateKey);
+    return sm2;
+  }
+
   static void validate(WalletFile walletFile) throws CipherException {
     WalletFile.Crypto crypto = walletFile.getCrypto();
 
