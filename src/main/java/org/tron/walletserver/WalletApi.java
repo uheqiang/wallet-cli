@@ -49,12 +49,18 @@ public class WalletApi {
   private static final String FilePath = "Wallet";
   private List<WalletFile> walletFile = new ArrayList<>();
   private boolean loginState = false;
-  private byte[] address;
-  private static byte addressPreFixByte = CommonConstant.ADD_PRE_FIX_BYTE_TESTNET;
+  private static byte addressPreFixByte;
   private static int rpcVersion = 2;
-  private static boolean isEckey = true;
+  private static boolean isEckey = false;
+
+  // 商家 或 称为可信节点账户地址
+  private byte[] address;
+  // 商家 或 称为可信节点账户对应的私钥
+  private byte[] privateKey;
   // appId 商家 或 称为可信节点ID
   private static String appId;
+
+  // 内置的ERC721协议的智能合约
   private static String contractAbi;
   private static String contractCode;
 
@@ -86,7 +92,6 @@ public class WalletApi {
     if (config.hasPath("contract.abi")) {
       contractAbi = config.getString("contract.abi");
     }
-
     if (config.hasPath("contract.code")) {
       contractCode = config.getString("contract.code");
     }
@@ -211,7 +216,7 @@ public class WalletApi {
     return Wallet.decryptSM2(key);
   }
 
-  public byte[] getPrivateBytes(byte[] password) throws CipherException, IOException {
+  public static byte[] getPrivateBytes(byte[] password) throws CipherException, IOException {
     WalletFile walletFile = loadWalletFile();
     return Wallet.decrypt2PrivateBytes(password, walletFile);
   }

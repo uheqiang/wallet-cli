@@ -167,7 +167,7 @@ public class WalletClient {
      * @param ownerPrivateKey 兑换者的私钥
      * @param frozenBalance 用于兑换能量的TRC10资产的数量
      */
-    public boolean freezeBalanceForMe(byte[] ownerAddress, byte[] ownerPrivateKey, long frozenBalance)
+    public boolean freezeBalanceForMyself(byte[] ownerAddress, byte[] ownerPrivateKey, long frozenBalance)
             throws IOException, CipherException, CancelException {
         ByteString assertId = ByteString.copyFromUtf8(ASSET_ID);
         return walletApiWrapper.freezeBalance(ownerAddress,ownerPrivateKey,frozenBalance,assertId,ownerAddress);
@@ -179,7 +179,7 @@ public class WalletClient {
      * @param ownerPrivateKey 兑换者的私钥
      * @param frozenBalance 用于兑换能量的TRC10资产的数量
      */
-    public boolean freezeBalanceForMe(String ownerBase58, String ownerPrivateKey, long frozenBalance)
+    public boolean freezeBalanceForMyself(String ownerBase58, String ownerPrivateKey, long frozenBalance)
             throws CipherException, IOException, CancelException {
         ByteString assertId = ByteString.copyFromUtf8(ASSET_ID);
         return freezeBalance(ownerBase58,ownerPrivateKey,frozenBalance,assertId,ownerBase58);

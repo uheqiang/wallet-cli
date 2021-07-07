@@ -407,6 +407,10 @@ public class WalletApiWrapper {
   public boolean freezeBalance(byte[] ownerAddress, byte[] ownerPrivateKey, long frozen_balance,
                                ByteString assertId, byte[] receiverAddress)
       throws CipherException, IOException, CancelException {
+    if (wallet == null || !wallet.isLoginState()) {
+      System.out.println("Warning: buyStorage failed, Please login first !!");
+      return false;
+    }
     return wallet.freezeBalance(ownerAddress,
             ownerPrivateKey,
             frozen_balance,
