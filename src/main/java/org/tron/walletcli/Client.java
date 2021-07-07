@@ -440,46 +440,6 @@ public class Client {
     }
   }
 
-  private void participateAssetIssue(String[] parameters)
-      throws IOException, CipherException, CancelException {
-    if (parameters == null || (parameters.length != 3 && parameters.length != 4)) {
-      System.out.println("ParticipateAssetIssue needs 3 parameters using the following syntax: ");
-      System.out.println("ParticipateAssetIssue [OwnerAddress] ToAddress AssetID Amount");
-      return;
-    }
-
-    int index = 0;
-    byte[] ownerAddress = null;
-    if (parameters.length == 4) {
-      ownerAddress = WalletApi.decodeFromBase58Check(parameters[index++]);
-      if (ownerAddress == null) {
-        System.out.println("Invalid OwnerAddress.");
-        return;
-      }
-    }
-
-    String base58Address = parameters[index++];
-    byte[] toAddress = WalletApi.decodeFromBase58Check(base58Address);
-    if (toAddress == null) {
-      System.out.println("Invalid toAddress.");
-      return;
-    }
-
-    String assertName = parameters[index++];
-    String amountStr = parameters[index++];
-    long amount = Long.parseLong(amountStr);
-
-    boolean result = walletApiWrapper
-        .participateAssetIssue(ownerAddress, toAddress, assertName, amount);
-    if (result) {
-      System.out.println("ParticipateAssetIssue " + assertName + " " + amount + " from " + base58Address
-              + " successful !!");
-    } else {
-      System.out.println("ParticipateAssetIssue " + assertName + " " + amount + " from " + base58Address
-              + " failed !!");
-    }
-  }
-
   private void assetIssue(String[] parameters)
       throws IOException, CipherException, CancelException {
     /*if (parameters == null || parameters.length < 12) {
@@ -697,24 +657,6 @@ public class Client {
       System.out.println(Utils.formatMessageString(proposalList));
     } else {
       System.out.println("ListProposalsPaginated failed !!!");
-    }
-  }
-
-  private void getExchangesListPaginated(String[] parameters) {
-    if (parameters == null || parameters.length != 2) {
-      System.out
-          .println("ListExchangesPaginated command needs 2 parameters, use the following syntax:");
-      System.out.println("ListExchangesPaginated offset limit ");
-      return;
-    }
-    int offset = Integer.parseInt(parameters[0]);
-    int limit = Integer.parseInt(parameters[1]);
-    Optional<ExchangeList> result = walletApiWrapper.getExchangeListPaginated(offset, limit);
-    if (result.isPresent()) {
-      ExchangeList exchangeList = result.get();
-      System.out.println(Utils.formatMessageString(exchangeList));
-    } else {
-      System.out.println("ListExchangesPaginated failed !!!");
     }
   }
 
@@ -967,33 +909,6 @@ public class Client {
       System.out.println(Utils.formatMessageString(delegatedResourceAccountIndex));
     } else {
       System.out.println("GetDelegatedResourceAccountIndex failed !!");
-    }
-  }
-
-  private void listExchanges() {
-    Optional<ExchangeList> result = walletApiWrapper.getExchangeList();
-    if (result.isPresent()) {
-      ExchangeList exchangeList = result.get();
-      System.out.println(Utils.formatMessageString(exchangeList));
-    } else {
-      System.out.println("ListExchanges failed !!!");
-    }
-  }
-
-  private void getExchange(String[] parameters) {
-    if (parameters == null || parameters.length != 1) {
-      System.out.println("Using getExchange command needs 1 parameter like: ");
-      System.out.println("getExchange id");
-      return;
-    }
-    String id = parameters[0];
-
-    Optional<Exchange> result = walletApiWrapper.getExchange(id);
-    if (result.isPresent()) {
-      Exchange exchange = result.get();
-      System.out.println(Utils.formatMessageString(exchange));
-    } else {
-      System.out.println("GetExchange failed !!!");
     }
   }
 
@@ -1361,29 +1276,6 @@ public class Client {
     }
   }
 
-  private void updateAccountPermission(String[] parameters)
-      throws CipherException, IOException, CancelException {
-    if (parameters == null || parameters.length != 2) {
-      System.out.println(
-          "Using updateAccountPermission needs 2 parameters, like UpdateAccountPermission ownerAddress permissions, permissions is json format");
-      return;
-    }
-
-    byte[] ownerAddress = WalletApi.decodeFromBase58Check(parameters[0]);
-    if (ownerAddress == null) {
-      System.out.println("GetContract: invalid address!");
-      return;
-    }
-
-    boolean ret = walletApiWrapper.accountPermissionUpdate(ownerAddress, parameters[1]);
-    if (ret) {
-      System.out.println("UpdateAccountPermission successful !!!");
-    } else {
-      System.out.println("UpdateAccountPermission failed !!!");
-    }
-  }
-
-
   private void getTransactionSignWeight(String[] parameters) throws InvalidProtocolBufferException {
     if (parameters == null || parameters.length != 1) {
       System.out.println(
@@ -1469,28 +1361,6 @@ public class Client {
       System.out.println("BroadcastTransaction failed !!!");
     }
   }
-
-  private void generateShieldedAddress(String[] parameters) throws IOException, CipherException {
-    int addressNum = 1;
-    if (parameters.length > 0 && !StringUtil.isNullOrEmpty(parameters[0])) {
-      addressNum = Integer.valueOf(parameters[0]);
-    }
-
-    ShieldedWrapper.getInstance().initShieldedWaletFile();
-
-    System.out.println("ShieldedAddress list:");
-    for (int i = 0; i < addressNum; ++i) {
-      Optional<ShieldedAddressInfo> addressInfo = walletApiWrapper.getNewShieldedAddress();
-      if (addressInfo.isPresent()) {
-        if (ShieldedWrapper.getInstance().addNewShieldedAddress(addressInfo.get(), true)) {
-          System.out.println(addressInfo.get().getAddress());
-        }
-      }
-    }
-
-    System.out.println("GenerateShieldedAddress successful !!!");
-  }
-
 
   private boolean isFromPublicAddress(String[] parameters) {
     if (Utils.isNumericString(parameters[0])) {
@@ -1736,10 +1606,6 @@ public class Client {
               getAssetIssueById(parameters);
               break;
             }
-            case "participateassetissue": {
-              participateAssetIssue(parameters);
-              break;
-            }
             case "assetissue": {
               assetIssue(parameters);
               break;
@@ -1794,18 +1660,6 @@ public class Client {
             }
             case "getdelegatedresourceaccountindex": {
               getDelegatedResourceAccountIndex(parameters);
-              break;
-            }
-            case "listexchanges": {
-              listExchanges();
-              break;
-            }
-            case "listexchangespaginated": {
-              getExchangesListPaginated(parameters);
-              break;
-            }
-            case "getexchange": {
-              getExchange(parameters);
               break;
             }
             case "getchainparameters": {
@@ -1908,10 +1762,6 @@ public class Client {
               generateAddress();
               break;
             }
-            case "updateaccountpermission": {
-              updateAccountPermission(parameters);
-              break;
-            }
             case "gettransactionsignweight": {
               getTransactionSignWeight(parameters);
               break;
@@ -1926,10 +1776,6 @@ public class Client {
             }
             case "broadcasttransaction": {
               broadcastTransaction(parameters);
-              break;
-            }
-            case "generateshieldedaddress": {
-              generateShieldedAddress(parameters);
               break;
             }
             case "create2": {

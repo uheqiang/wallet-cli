@@ -64,7 +64,8 @@ public class WalletClient {
      * @param assetId 资产ID
      * @param amount 转移数量
      */
-    public boolean assetTransfer(String fromBase58, String fromPrivateKey, String toBase58, String assetId, long amount)
+    public boolean assetTransfer(String fromBase58, String fromPrivateKey,
+                                 String toBase58, String assetId, long amount)
             throws CipherException, IOException, CancelException {
         byte[] from = WalletApi.decodeFromBase58Check(fromBase58);
         byte[] to = WalletApi.decodeFromBase58Check(toBase58);
@@ -80,7 +81,8 @@ public class WalletClient {
      * @param assetId 资产ID
      * @param amount 转移数量
      */
-    public boolean assetTransfer(byte[] from, byte[] fromPrivateKey, byte[] to, String assetId, long amount)
+    public boolean assetTransfer(byte[] from, byte[] fromPrivateKey,
+                                 byte[] to, String assetId, long amount)
             throws CipherException, IOException, CancelException {
         if (StringUtils.isEmpty(assetId)) {
             assetId = ASSET_ID;
@@ -170,7 +172,8 @@ public class WalletClient {
     public boolean freezeBalanceForMyself(byte[] ownerAddress, byte[] ownerPrivateKey, long frozenBalance)
             throws IOException, CipherException, CancelException {
         ByteString assertId = ByteString.copyFromUtf8(ASSET_ID);
-        return walletApiWrapper.freezeBalance(ownerAddress,ownerPrivateKey,frozenBalance,assertId,ownerAddress);
+        return walletApiWrapper.freezeBalance(ownerAddress,ownerPrivateKey,
+                frozenBalance,assertId,ownerAddress);
     }
 
     /**
@@ -216,7 +219,8 @@ public class WalletClient {
      * @param identity 用户身份（hash值）
      * @return 交易发送结果
      */
-    public boolean createAccount(String ownerBase58, String ownerPrivateKey, String addressBase58, String identity)
+    public boolean createAccount(String ownerBase58, String ownerPrivateKey,
+                                 String addressBase58, String identity)
             throws CipherException, IOException, CancelException {
         byte[] owner = WalletApi.decodeFromBase58Check(ownerBase58);
         byte[] address = WalletApi.decodeFromBase58Check(addressBase58);
@@ -239,7 +243,8 @@ public class WalletClient {
      * @param symbol NFT代表符号
      * @param ownerBase58 NFT发布者
      */
-    public boolean deployContract(String name, String symbol, String ownerBase58, String ownerPrivateKey)
+    public boolean deployContract(String name, String symbol,
+                                  String ownerBase58, String ownerPrivateKey)
             throws CipherException, IOException, CancelException {
         byte[] owner = WalletApi.decodeFromBase58Check(ownerBase58);
         byte[] keyBytes = ByteArray.fromHexString(ownerPrivateKey);
@@ -252,7 +257,8 @@ public class WalletClient {
      * @param symbol NFT代表符号
      * @param ownerAddress NFT发布者
      */
-    public boolean deployContract(String name, String symbol, byte[] ownerAddress, byte[] ownerPrivateKey)
+    public boolean deployContract(String name, String symbol,
+                                  byte[] ownerAddress, byte[] ownerPrivateKey)
             throws IOException, CipherException, CancelException {
         long feeLimit = 0L;
         long value = 0L;
@@ -269,8 +275,10 @@ public class WalletClient {
         String abiStr = "";//Objects.requireNonNull
         codeStr += Hex.toHexString(Objects.requireNonNull(AbiUtil.encodeInput(constructorStr, argsStr)));
         //todo 参数优化！！！
-        return walletApiWrapper.deployContract(ownerAddress,ownerPrivateKey,name,abiStr,codeStr,feeLimit,value,
-                consumeUserResourcePercent,originEnergyLimit,tokenValue,tokenId,libraryAddressPair,compilerVersion);
+        return walletApiWrapper.deployContract(ownerAddress,ownerPrivateKey,
+                name,abiStr,codeStr,feeLimit,value,
+                consumeUserResourcePercent,originEnergyLimit,tokenValue,
+                tokenId,libraryAddressPair,compilerVersion);
     }
 
     /**
@@ -339,7 +347,8 @@ public class WalletClient {
         return WalletApi.encode58Check(result);
     }
 
-    private byte[] callConstantContract(byte[] contractAddress,byte[] ownerAddress, String method, String argsStr) {
+    private byte[] callConstantContract(byte[] contractAddress,byte[] ownerAddress,
+                                        String method, String argsStr) {
         byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, false));
         return walletApiWrapper.triggerConstantContract(ownerAddress, contractAddress, data);
     }
