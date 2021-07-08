@@ -13,6 +13,7 @@ import org.tron.core.exception.CancelException;
 import org.tron.core.exception.CipherException;
 import org.tron.core.exception.DecodingException;
 import org.tron.core.exception.TronException;
+import org.tron.keystore.Wallet;
 import org.tron.protos.Protocol;
 import org.tron.walletserver.WalletApi;
 
@@ -229,55 +230,60 @@ public class WalletClient {
     }
 
     /**
-     * 创建商家
+     * 注册商家
+     * @return 商家的ID
      */
-    //todo 设计逻辑待优化
-    public boolean createBusiness()
-            throws IOException, CipherException, CancelException {
+    public String createBusiness() {
         return walletApiWrapper.createBusiness();
     }
 
     /**
      * 商家发布NFT，部署合约
-     * @param name NFT名称
-     * @param symbol NFT代表符号
      * @param ownerBase58 NFT发布者
+     * @param ownerPrivateKey NFT发布者的私钥
+     * @param contractName NFT合约名称
+     * @param energyPay 部署合约需要支付的手续费
      */
-    public boolean deployContract(String name, String symbol,
-                                  String ownerBase58, String ownerPrivateKey)
-            throws CipherException, IOException, CancelException {
+    public String deployContract(String ownerBase58, String ownerPrivateKey, String contractName, long energyPay)
+            throws CancelException {
         byte[] owner = WalletApi.decodeFromBase58Check(ownerBase58);
         byte[] keyBytes = ByteArray.fromHexString(ownerPrivateKey);
-        return deployContract(name,symbol,owner, keyBytes);
+        return deployContract(owner,keyBytes,contractName,energyPay);
     }
 
     /**
      * 商家发布NFT，部署合约
-     * @param name NFT名称
-     * @param symbol NFT代表符号
      * @param ownerAddress NFT发布者
+     * @param ownerPrivateKey NFT发布者的私钥
+     * @param contractName NFT合约名称
+     * @param energyPay 部署合约需要支付的手续费
+     * @return 合约地址
      */
-    public boolean deployContract(String name, String symbol,
-                                  byte[] ownerAddress, byte[] ownerPrivateKey)
-            throws IOException, CipherException, CancelException {
+    public String deployContract(byte[] ownerAddress, byte[] ownerPrivateKey,
+                                 String contractName, long energyPay) throws CancelException {
+        List<Object> parameters = Arrays.asList("name", "symbol");
+        String argsStr = parametersString(parameters);
+        String constructorStr = "constructor(string,string)";
+        String codeStr = Objects.requireNonNull(WalletApi.contractCode);
+        String abiStr = Objects.requireNonNull(WalletApi.contractAbi);
+        codeStr += Hex.toHexString(Objects.requireNonNull(AbiUtil.encodeInput(constructorStr, argsStr)));
+        return deployContract(codeStr, abiStr, contractName,
+                ownerAddress, ownerPrivateKey, energyPay, null, null);
+    }
+
+    private String deployContract(String codeStr,String abiStr, String contractName,
+                                  byte[] ownerAddress, byte[] ownerPrivateKey,long energyPay,
+                                  String libraryAddressPair, String compilerVersion)
+            throws CancelException {
         long feeLimit = 0L;
         long value = 0L;
         long consumeUserResourcePercent = 0L;
-        long originEnergyLimit = 1000000L;
+
         long tokenValue = 0L;
         String tokenId = "0";
-        String libraryAddressPair = null;
-        String compilerVersion = null;
-        List<Object> parameters = Arrays.asList(name, symbol);
-        String argsStr = parametersString(parameters);
-        String constructorStr = "constructor(string,string)";
-        String codeStr = "";//Objects.requireNonNull
-        String abiStr = "";//Objects.requireNonNull
-        codeStr += Hex.toHexString(Objects.requireNonNull(AbiUtil.encodeInput(constructorStr, argsStr)));
-        //todo 参数优化！！！
         return walletApiWrapper.deployContract(ownerAddress,ownerPrivateKey,
-                name,abiStr,codeStr,feeLimit,value,
-                consumeUserResourcePercent,originEnergyLimit,tokenValue,
+                contractName,abiStr,codeStr,feeLimit,value,
+                consumeUserResourcePercent,energyPay,tokenValue,
                 tokenId,libraryAddressPair,compilerVersion);
     }
 
@@ -319,19 +325,6 @@ public class WalletClient {
         return ByteUtil.byteArrayToLong(result);
     }
 
-    /**
-     * 根据NFT的ID查询NFT的元信息
-     * @param contractAddress 合约地址
-     * @param ownerAddress NFT拥有者
-     * @param tokenId NFT的ID
-     */
-    public String tokenUriFromContract(byte[] contractAddress, byte[] ownerAddress, long tokenId) {
-        List<Object> parameters = Collections.singletonList(tokenId);
-        String argsStr = parametersString(parameters);
-        String method = "tokenURI(uint256)";
-        byte[] result =  callConstantContract(contractAddress, ownerAddress, method, argsStr);
-        return Strings.fromByteArray(result).trim();
-    }
 
     /**
      * 根据NFT的ID查询NFT的拥有者
@@ -353,40 +346,87 @@ public class WalletClient {
         return walletApiWrapper.triggerConstantContract(ownerAddress, contractAddress, data);
     }
 
+    /**
+     * 发布NFT，接收者是自己
+     * @param contractOwner  合约owner
+     * @param ownerPrivateKey  合约owner的私钥
+     * @param contractAddress  合约地址
+     * @param tokenId token ID
+     * @param metaData token的元数据
+     */
     public boolean mintNftToMyself(byte[] contractOwner, byte[] ownerPrivateKey, byte[] contractAddress,
-                           long tokenId, String metaData)
+                           long tokenId, String metaData, long energyPay)
             throws IOException, CipherException, CancelException {
-        return mintNft(contractOwner,ownerPrivateKey,contractAddress,contractOwner,tokenId,metaData);
+        return mintNft(contractOwner,ownerPrivateKey,contractAddress,contractOwner,tokenId,metaData,energyPay);
     }
 
+    /**
+     * 发布NFT，接收者是自己, 可以是他人
+     * @param contractOwner 合约owner
+     * @param ownerPrivateKey 合约owner的私钥
+     * @param contractAddress 合约地址
+     * @param mintTo token接收者地址
+     * @param tokenId token ID
+     * @param metaData token的元数据
+     */
     public boolean mintNft(byte[] contractOwner, byte[] ownerPrivateKey, byte[] contractAddress,
-                        byte[] mintTo, long tokenId, String metaData)
-            throws IOException, CipherException, CancelException {
+                        byte[] mintTo, long tokenId, String metaData, long energyPay)
+            throws CancelException {
         String method = "mint(address,uint256,string)";
         List<Object> parameters = Arrays.asList(mintTo,tokenId,metaData);
         String argsStr = parametersString(parameters);
         byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, false));
-        return walletApiWrapper.triggerContract(contractOwner,ownerPrivateKey,contractAddress,data);
+        return walletApiWrapper.triggerContract(contractOwner,ownerPrivateKey,contractAddress,data,energyPay);
     }
 
+    /**
+     * 转移NFT
+     * @param tokenOwner token拥有者
+     * @param ownerPrivateKey token拥有者私钥
+     * @param contractAddress 合约地址
+     * @param to token接收者
+     * @param tokenId 被转移的token ID
+     */
     public boolean transferNft(byte[] tokenOwner, byte[] ownerPrivateKey, byte[] contractAddress,
-                            byte[] to, long tokenId)
+                            byte[] to, long tokenId, long energyPay)
             throws IOException, CipherException, CancelException {
         String method = "transferFrom(address,address,uint256)";
         List<Object> parameters = Arrays.asList(tokenOwner,to,tokenId);
         String argsStr = parametersString(parameters);
         byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, false));
-        return walletApiWrapper.triggerContract(tokenOwner,ownerPrivateKey,contractAddress,data);
+        return walletApiWrapper.triggerContract(tokenOwner,ownerPrivateKey,contractAddress,data,energyPay);
     }
 
+    /**
+     * 根据NFT的ID查询NFT的元信息
+     * @param contractAddress 合约地址
+     * @param ownerAddress NFT拥有者
+     * @param tokenId NFT的ID
+     */
+    public String tokenUriFromContract(byte[] contractAddress, byte[] ownerAddress, long tokenId) {
+        List<Object> parameters = Collections.singletonList(tokenId);
+        String argsStr = parametersString(parameters);
+        String method = "tokenURI(uint256)";
+        byte[] result =  callConstantContract(contractAddress, ownerAddress, method, argsStr);
+        return Strings.fromByteArray(result).trim();
+    }
+
+    /**
+     * 设置Token的元数据
+     * @param tokenOwner token拥有者
+     * @param ownerPrivateKey token拥有者私钥
+     * @param contractAddress 合约地址
+     * @param tokenId NFT的ID
+     * @param metaData 更新后NFT的元数据
+     */
     public boolean setTokenURI(byte[] tokenOwner, byte[] ownerPrivateKey, byte[] contractAddress,
-                            long tokenId, String metaData)
-            throws IOException, CipherException, CancelException {
+                            long tokenId, String metaData, long energyPay)
+            throws CancelException {
         String method = "setTokenURI(uint256,string)";
         List<Object> parameters = Arrays.asList(tokenId,metaData);
         String argsStr = parametersString(parameters);
         byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, false));
-        return walletApiWrapper.triggerContract(tokenOwner,ownerPrivateKey,contractAddress,data);
+        return walletApiWrapper.triggerContract(tokenOwner,ownerPrivateKey,contractAddress,data,energyPay);
     }
 
     private String parametersString(List<Object> parameters) {

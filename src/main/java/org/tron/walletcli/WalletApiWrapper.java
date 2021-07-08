@@ -1,6 +1,7 @@
 package org.tron.walletcli;
 
 import com.google.protobuf.ByteString;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.tron.api.GrpcAPI;
 import org.tron.api.GrpcAPI.*;
@@ -175,14 +176,13 @@ public class WalletApiWrapper {
     return wallet.createAccount(owner, ownerPrivateKey, address, identity);
   }
 
-  public boolean createBusiness() throws CipherException, IOException, CancelException {
+  public String createBusiness() {
     return wallet.createBusiness();
   }
 
   public AddressPrKeyPairMessage generateAddress() {
     return WalletApi.generateAddress();
   }
-
 
   public boolean createWitness(byte[] ownerAddress, String url)
       throws CipherException, IOException, CancelException {
@@ -384,30 +384,29 @@ public class WalletApiWrapper {
   }
 
   public boolean exchangeTransaction(byte[] ownerAddress, long exchangeId, byte[] tokenId,
-      long quant, long expected)
-      throws CipherException, IOException, CancelException {
+      long quant, long expected) throws CipherException, IOException, CancelException {
     return wallet.exchangeTransaction(ownerAddress, exchangeId, tokenId, quant, expected);
   }
 
   public boolean updateSetting(byte[] ownerAddress, byte[] contractAddress,
-      long consumeUserResourcePercent)
-      throws CipherException, IOException, CancelException {
+      long consumeUserResourcePercent) throws CipherException, IOException, CancelException {
     return wallet.updateSetting(ownerAddress, contractAddress, consumeUserResourcePercent);
 
   }
 
   public boolean updateEnergyLimit(byte[] ownerAddress, byte[] contractAddress,
-      long originEnergyLimit)
-      throws CipherException, IOException, CancelException {
+      long originEnergyLimit) throws CipherException, IOException, CancelException {
     return wallet.updateEnergyLimit(ownerAddress, contractAddress, originEnergyLimit);
   }
 
-  public boolean deployContract(byte[] ownerAddress, byte[] ownerPrivatekey, String name, String abiStr, String codeStr,
-      long feeLimit, long value, long consumeUserResourcePercent, long originEnergyLimit,
-      long tokenValue, String tokenId, String libraryAddressPair, String compilerVersion)
-      throws CipherException, IOException, CancelException {
+  public String deployContract(byte[] ownerAddress, byte[] ownerPrivatekey, String name,
+                                String abiStr, String codeStr, long feeLimit, long value,
+                                long consumeUserResourcePercent, long energyPay,
+                                long tokenValue, String tokenId, String libraryAddressPair,
+                                String compilerVersion) throws CancelException {
+    long originEnergyLimit = 1000000L;
     return wallet.deployContract(ownerAddress, ownerPrivatekey, name, abiStr, codeStr, feeLimit, value,
-            consumeUserResourcePercent, originEnergyLimit, tokenValue, tokenId,
+            consumeUserResourcePercent, energyPay, originEnergyLimit, tokenValue, tokenId,
             libraryAddressPair, compilerVersion);
   }
 
@@ -415,21 +414,11 @@ public class WalletApiWrapper {
     return wallet.triggerConstantContract(owner,contractAddress,data);
   }
 
-  public boolean triggerContract(byte[] owner, byte[] ownerPrivateKey, byte[] contractAddress, byte[] data)
-          throws CipherException, IOException, CancelException {
-    return wallet.triggerContract(owner, ownerPrivateKey, contractAddress, data,100000L);
-  }
-
-  public boolean callContract(byte[] ownerAddress, byte[] contractAddress, long callValue,
-      byte[] data, long feeLimit,
-      long tokenValue, String tokenId, long originEnergyLimit, boolean isConstant)
-      throws CipherException, IOException, CancelException {
-    if (wallet == null || !wallet.isLoginState()) {
-      System.out.println("Warning: callContract failed,  Please login first !!");
-      return false;
-    }
-    return wallet.triggerContract(ownerAddress, contractAddress, callValue, data, feeLimit, tokenValue,
-            tokenId, originEnergyLimit, isConstant);
+  public boolean triggerContract(byte[] owner, byte[] ownerPrivateKey,
+                                 byte[] contractAddress, byte[] data, long energyPay)
+          throws CancelException {
+    long originEnergyLimit = 100000L;
+    return wallet.triggerContract(owner, ownerPrivateKey, contractAddress, data,originEnergyLimit,energyPay);
   }
 
   // TODO 在这里设置可信节点对用户发起的交易进行签名

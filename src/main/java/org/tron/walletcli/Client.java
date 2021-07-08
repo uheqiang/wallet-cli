@@ -541,13 +541,9 @@ public class Client {
   }
 
 
-  private void createBusiness() throws CipherException, IOException, CancelException {
-    boolean result = walletApiWrapper.createBusiness();
-    if (result) {
-      System.out.println("CreateBusiness successful !!");
-    } else {
-      System.out.println("CreateBusiness failed !!");
-    }
+  private void createBusiness() {
+    String result = walletApiWrapper.createBusiness();
+    System.out.println("CreateBusiness successful !!, ID: " + result);
   }
 
 

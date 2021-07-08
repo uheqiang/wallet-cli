@@ -30,17 +30,8 @@ public class BusinessTests {
 
     @Test
     public void createAccountBusiness() {
-        boolean result = false;
-        try {
-            result = walletApiWrapper.createBusiness();
-        } catch (CipherException | IOException | CancelException e) {
-            e.printStackTrace();
-        }
-        if (result) {
-            System.out.println("CreateBusiness successful !!");
-        } else {
-            System.out.println("CreateBusiness failed !!");
-        }
+        String result = walletApiWrapper.createBusiness();
+        System.out.println("business id: " + result);
     }
 
     @Test
