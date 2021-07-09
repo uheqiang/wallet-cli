@@ -8,6 +8,7 @@ import com.google.gson.JsonParser;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import com.sun.org.apache.bcel.internal.generic.RETURN;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
@@ -387,6 +388,17 @@ public class WalletApi {
       throw new CancelException(weight.getResult().getMessage());
     }
     return transaction;
+  }
+
+  private byte[] signdelegationPay(DelegationPay delegationPay, byte[] privateKey) {
+    if (delegationPay == null) {
+      return null;
+    }
+    if (isEckey) {
+      return TransactionUtils.sign(delegationPay, this.getEcKey(privateKey));
+    } else {
+      return TransactionUtils.sign(delegationPay, this.getSM2(privateKey));
+    }
   }
 
 /*  private Transaction signTransaction(Transaction transaction)
@@ -1617,6 +1629,8 @@ public class WalletApi {
       long value,
       long consumeUserResourcePercent,
       long energyPay,
+      DelegationPay delegationPay,
+      byte[] delegationPaySignature,
       long originEnergyLimit,
       long tokenValue,
       String tokenId,
@@ -1653,6 +1667,12 @@ public class WalletApi {
         .setOwnerAddress(ByteString.copyFrom(address))
         .setNewContract(builder.build())
         .setCallEnergyValue(energyPay);
+
+    if (delegationPay != null && ArrayUtils.isEmpty(delegationPaySignature)) {
+      createSmartContractBuilder
+              .setDelegationPay(delegationPay)
+              .setDelegationPaySignature(ByteString.copyFrom(delegationPaySignature));
+    }
     if (tokenId != null && !tokenId.equalsIgnoreCase("") && !tokenId.equalsIgnoreCase("#")) {
       createSmartContractBuilder.setCallTokenValue(tokenValue).setTokenId(Long.parseLong(tokenId));
     }
@@ -1711,7 +1731,9 @@ public class WalletApi {
       long tokenValue,
       String tokenId,
       long originEnergyLimit,
-      long energyPay) {
+      long energyPay,
+      DelegationPay delegationPay,
+      byte[] delegationPaySignature) {
     Contract.TriggerSmartContract.Builder builder = Contract.TriggerSmartContract.newBuilder();
     builder.setOwnerAddress(ByteString.copyFrom(address));
     builder.setContractAddress(ByteString.copyFrom(contractAddress));
@@ -1719,6 +1741,10 @@ public class WalletApi {
     builder.setCallValue(callValue);
     builder.setOriginEnergyLimit(originEnergyLimit);
     builder.setCallEnergyValue(energyPay);
+    if (delegationPay != null && ArrayUtils.isEmpty(delegationPaySignature)) {
+      builder.setDelegationPay(delegationPay)
+              .setDelegationPaySignature(ByteString.copyFrom(delegationPaySignature));
+    }
     if (tokenId != null && tokenId != "") {
       builder.setCallTokenValue(tokenValue);
       builder.setTokenId(Long.parseLong(tokenId));
@@ -1808,6 +1834,8 @@ public class WalletApi {
       long value,
       long consumeUserResourcePercent,
       long energyPay,
+      DelegationPay delegationPay,
+      byte[] delegationPrivateKey,
       long originEnergyLimit,
       long tokenValue,
       String tokenId,
@@ -1818,20 +1846,23 @@ public class WalletApi {
       owner = getAddress();
     }
 
+    byte[] delegationPaySignature = signdelegationPay(delegationPay, delegationPrivateKey);
     CreateSmartContract contractDeployContract =
         createContractDeployContract(
-            contractName,
-            owner,
-            ABI,
-            code,
-            value,
-            consumeUserResourcePercent,
-            energyPay,
-            originEnergyLimit,
-            tokenValue,
-            tokenId,
-            libraryAddressPair,
-            compilerVersion);
+              contractName,
+              owner,
+              ABI,
+              code,
+              value,
+              consumeUserResourcePercent,
+              energyPay,
+              delegationPay,
+              delegationPaySignature,
+              originEnergyLimit,
+              tokenValue,
+              tokenId,
+              libraryAddressPair,
+              compilerVersion);
 
     TransactionExtention transactionExtention = rpcCli.deployContract(contractDeployContract);
     if (transactionExtention == null || !transactionExtention.getResult().getResult()) {
@@ -1875,7 +1906,7 @@ public class WalletApi {
   public byte[] triggerConstantContract(byte[] owner, byte[] contractAddress, byte[] data) {
     byte[] result = new byte[0];
     Contract.TriggerSmartContract triggerContract = triggerCallContract(owner, contractAddress, 0L,
-            data, 0L, "0", 0L,0L);
+            data, 0L, "0", 0L,0L,null,null);
     TransactionExtention transactionExtention = rpcCli.triggerConstantContract(triggerContract);
     if (transactionExtention == null || !transactionExtention.getResult().getResult()) {
       //System.out.println("RPC create call trx failed!");
@@ -1905,11 +1936,13 @@ public class WalletApi {
           byte[] contractAddress,
           byte[] data,
           long originEnergyLimit,
-          long energyPay)
+          long energyPay,
+          DelegationPay delegationPay,
+          byte[] delegationPrivatekey)
           throws CancelException {
     return triggerContract(owner,ownerPrivateKey,contractAddress,
             0L, data,0L,0L,
-            "0",originEnergyLimit,energyPay,true);
+            "0",originEnergyLimit,energyPay,delegationPay,delegationPrivatekey,false);
   }
 
   public boolean triggerContract(
@@ -1923,14 +1956,16 @@ public class WalletApi {
           String tokenId,
           long originEnergyLimit,
           long energyPay,
+          DelegationPay delegationPay,
+          byte[] delegationPrivatekey,
           boolean isConstant)
           throws CancelException {
-    if (owner == null) {
-      owner = getAddress();
+    byte[] delegationPaySignature = null;
+    if (delegationPay != null) {
+      delegationPaySignature = signdelegationPay(delegationPay,delegationPrivatekey);
     }
-
     Contract.TriggerSmartContract triggerContract = triggerCallContract(owner, contractAddress, callValue,
-            data, tokenValue, tokenId ,originEnergyLimit, energyPay);
+            data, tokenValue, tokenId ,originEnergyLimit, energyPay,delegationPay,delegationPaySignature);
     TransactionExtention transactionExtention;
     if (isConstant) {
       transactionExtention = rpcCli.triggerConstantContract(triggerContract);

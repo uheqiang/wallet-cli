@@ -400,13 +400,14 @@ public class WalletApiWrapper {
   }
 
   public String deployContract(byte[] ownerAddress, byte[] ownerPrivatekey, String name,
-                                String abiStr, String codeStr, long feeLimit, long value,
-                                long consumeUserResourcePercent, long energyPay,
-                                long tokenValue, String tokenId, String libraryAddressPair,
-                                String compilerVersion) throws CancelException {
+                               String abiStr, String codeStr, long feeLimit, long value,
+                               long consumeUserResourcePercent, long energyPay, Contract.DelegationPay delegationPay,
+                               byte[] delegationPrivateKey,
+                               long tokenValue, String tokenId, String libraryAddressPair,
+                               String compilerVersion) throws CancelException {
     long originEnergyLimit = 1000000L;
     return wallet.deployContract(ownerAddress, ownerPrivatekey, name, abiStr, codeStr, feeLimit, value,
-            consumeUserResourcePercent, energyPay, originEnergyLimit, tokenValue, tokenId,
+            consumeUserResourcePercent, energyPay, delegationPay, delegationPrivateKey, originEnergyLimit, tokenValue, tokenId,
             libraryAddressPair, compilerVersion);
   }
 
@@ -415,10 +416,13 @@ public class WalletApiWrapper {
   }
 
   public boolean triggerContract(byte[] owner, byte[] ownerPrivateKey,
-                                 byte[] contractAddress, byte[] data, long energyPay)
+                                 byte[] contractAddress, byte[] data, long energyPay,
+                                 Contract.DelegationPay delegationPay,
+                                 byte[] delegationPrivatekey)
           throws CancelException {
     long originEnergyLimit = 100000L;
-    return wallet.triggerContract(owner, ownerPrivateKey, contractAddress, data,originEnergyLimit,energyPay);
+    return wallet.triggerContract(owner, ownerPrivateKey, contractAddress,
+            data,originEnergyLimit,energyPay,delegationPay,delegationPrivatekey);
   }
 
   // TODO 在这里设置可信节点对用户发起的交易进行签名

@@ -22,6 +22,7 @@ import org.tron.common.crypto.Sha256Sm3Hash;
 import org.tron.common.crypto.SignInterface;
 import org.tron.common.crypto.SignatureInterface;
 import org.tron.core.exception.CancelException;
+import org.tron.protos.Contract;
 import org.tron.protos.Protocol.Transaction;
 
 import java.security.SignatureException;
@@ -222,6 +223,12 @@ public class TransactionUtils {
     transactionBuilderSigned.addSignature(bsSign);
     transaction = transactionBuilderSigned.build();
     return transaction;
+  }
+
+  public static byte[] sign(Contract.DelegationPay delegationPay, SignInterface myKey) {
+    byte[] hash = Sha256Sm3Hash.hash(delegationPay.toByteArray());
+    SignatureInterface signature = myKey.sign(hash);
+    return signature.toByteArray();
   }
 
   public static Transaction setTimestamp(Transaction transaction) {

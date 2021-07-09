@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.spongycastle.util.Strings;
 import org.spongycastle.util.encoders.Hex;
+import org.tron.common.crypto.SignUtils;
 import org.tron.common.entity.AccountInfo;
 import org.tron.common.utils.AbiUtil;
 import org.tron.common.utils.ByteArray;
@@ -14,6 +15,7 @@ import org.tron.core.exception.CipherException;
 import org.tron.core.exception.DecodingException;
 import org.tron.core.exception.TronException;
 import org.tron.keystore.Wallet;
+import org.tron.protos.Contract;
 import org.tron.protos.Protocol;
 import org.tron.walletserver.WalletApi;
 
@@ -38,7 +40,10 @@ public class WalletClient {
      * @param name 资产名称
      * @param totalSupply 发布总量
      */
-    public boolean assetIssue(String ownerBase58, String ownerPriKey, String name, long totalSupply)
+    public boolean assetIssue(String ownerBase58,
+                              String ownerPriKey,
+                              String name,
+                              long totalSupply)
             throws IOException, CipherException, CancelException {
         byte[] addressBytes = WalletApi.decodeFromBase58Check(ownerBase58);
         byte[] keyBytes = ByteArray.fromHexString(ownerPriKey);
@@ -52,7 +57,10 @@ public class WalletClient {
      * @param name 资产名称
      * @param totalSupply 发布总量
      */
-    public boolean assetIssue(byte[] owner, byte[] ownerKey, String name, long totalSupply)
+    public boolean assetIssue(byte[] owner,
+                              byte[] ownerKey,
+                              String name,
+                              long totalSupply)
             throws IOException, CipherException, CancelException {
         return walletApiWrapper.assetIssue(owner,ownerKey,name,totalSupply);
     }
@@ -65,8 +73,11 @@ public class WalletClient {
      * @param assetId 资产ID
      * @param amount 转移数量
      */
-    public boolean assetTransfer(String fromBase58, String fromPrivateKey,
-                                 String toBase58, String assetId, long amount)
+    public boolean assetTransfer(String fromBase58,
+                                 String fromPrivateKey,
+                                 String toBase58,
+                                 String assetId,
+                                 long amount)
             throws CipherException, IOException, CancelException {
         byte[] from = WalletApi.decodeFromBase58Check(fromBase58);
         byte[] to = WalletApi.decodeFromBase58Check(toBase58);
@@ -82,8 +93,11 @@ public class WalletClient {
      * @param assetId 资产ID
      * @param amount 转移数量
      */
-    public boolean assetTransfer(byte[] from, byte[] fromPrivateKey,
-                                 byte[] to, String assetId, long amount)
+    public boolean assetTransfer(byte[] from,
+                                 byte[] fromPrivateKey,
+                                 byte[] to,
+                                 String assetId,
+                                 long amount)
             throws CipherException, IOException, CancelException {
         if (StringUtils.isEmpty(assetId)) {
             assetId = ASSET_ID;
@@ -170,7 +184,9 @@ public class WalletClient {
      * @param ownerPrivateKey 兑换者的私钥
      * @param frozenBalance 用于兑换能量的TRC10资产的数量
      */
-    public boolean freezeBalanceForMyself(byte[] ownerAddress, byte[] ownerPrivateKey, long frozenBalance)
+    public boolean freezeBalanceForMyself(byte[] ownerAddress,
+                                          byte[] ownerPrivateKey,
+                                          long frozenBalance)
             throws IOException, CipherException, CancelException {
         ByteString assertId = ByteString.copyFromUtf8(ASSET_ID);
         return walletApiWrapper.freezeBalance(ownerAddress,ownerPrivateKey,
@@ -183,14 +199,19 @@ public class WalletClient {
      * @param ownerPrivateKey 兑换者的私钥
      * @param frozenBalance 用于兑换能量的TRC10资产的数量
      */
-    public boolean freezeBalanceForMyself(String ownerBase58, String ownerPrivateKey, long frozenBalance)
+    public boolean freezeBalanceForMyself(String ownerBase58,
+                                          String ownerPrivateKey,
+                                          long frozenBalance)
             throws CipherException, IOException, CancelException {
         ByteString assertId = ByteString.copyFromUtf8(ASSET_ID);
         return freezeBalance(ownerBase58,ownerPrivateKey,frozenBalance,assertId,ownerBase58);
     }
 
-    private boolean freezeBalance(String ownerBase58, String ownerPrivateKey, long frozenBalance,
-                                  ByteString assertId, String receiverBase58)
+    private boolean freezeBalance(String ownerBase58,
+                                  String ownerPrivateKey,
+                                  long frozenBalance,
+                                  ByteString assertId,
+                                  String receiverBase58)
             throws IOException, CipherException, CancelException {
         byte[] owner = WalletApi.decodeFromBase58Check(ownerBase58);
         byte[] receiver = WalletApi.decodeFromBase58Check(receiverBase58);
@@ -207,7 +228,10 @@ public class WalletClient {
      * @param identity 用户身份（hash值）
      * @return 交易发送结果
      */
-    public boolean createAccount(byte[] owner, byte[] ownerPrivateKey, byte[] address, String identity)
+    public boolean createAccount(byte[] owner,
+                                 byte[] ownerPrivateKey,
+                                 byte[] address,
+                                 String identity)
             throws CipherException, IOException, CancelException {
         return walletApiWrapper.createAccount(owner, ownerPrivateKey, address, identity);
     }
@@ -238,17 +262,75 @@ public class WalletClient {
     }
 
     /**
-     * 商家发布NFT，部署合约
+     * 商家发布NFT，部署合约，不需要委托支付
      * @param ownerBase58 NFT发布者
      * @param ownerPrivateKey NFT发布者的私钥
      * @param contractName NFT合约名称
      * @param energyPay 部署合约需要支付的手续费
      */
-    public String deployContract(String ownerBase58, String ownerPrivateKey, String contractName, long energyPay)
+    public String deployContract(String ownerBase58,
+                                 String ownerPrivateKey,
+                                 String contractName,
+                                 long energyPay)
             throws CancelException {
         byte[] owner = WalletApi.decodeFromBase58Check(ownerBase58);
         byte[] keyBytes = ByteArray.fromHexString(ownerPrivateKey);
-        return deployContract(owner,keyBytes,contractName,energyPay);
+        return deployContract(owner,keyBytes,contractName,energyPay,null,null);
+    }
+
+    /**
+     * 商家发布NFT，部署合约，需要委托支付
+     * @param ownerBase58 NFT发布者
+     * @param ownerPrivateKey NFT发布者的私钥
+     * @param contractName NFT合约名称
+     * @param energyPay  付的手续费
+     * @param sponsorBase58  代理支付地址
+     * @param sponsorPrivateKey 代理支付私钥
+     * @param limitPerTransaction 代理支付最大额度
+     */
+    public String deployContract(String ownerBase58,
+                                 String ownerPrivateKey,
+                                 String contractName,
+                                 long energyPay,
+                                 String sponsorBase58,
+                                 String sponsorPrivateKey,
+                                 long limitPerTransaction)
+            throws CancelException {
+        Contract.DelegationPay.Builder delegationPayBuilder = Contract.DelegationPay.newBuilder();
+        delegationPayBuilder.setSupport(true);
+        byte[] byteSponsor = Objects.requireNonNull(WalletApi.decodeFromBase58Check(sponsorBase58));
+        ByteString sponsor = ByteString.copyFrom(byteSponsor);
+        delegationPayBuilder.setSponsor(sponsor);
+        delegationPayBuilder.setSponsorlimitpertransaction(limitPerTransaction);
+        byte[] delegationPrivateKey = null;
+        if (StringUtils.isNotEmpty(sponsorPrivateKey)) {
+            delegationPrivateKey = ByteArray.fromHexString(ownerPrivateKey);
+        }
+        return deployContract(ownerBase58,ownerPrivateKey,contractName,energyPay,
+                delegationPayBuilder.build(),delegationPrivateKey);
+
+    }
+
+
+    /**
+     * 商家发布NFT，部署合约，可以设置委托支付
+     * @param ownerBase58 NFT发布者
+     * @param ownerPrivateKey NFT发布者的私钥
+     * @param contractName NFT合约名称
+     * @param energyPay 部署合约需要支付的手续费
+     * @param delegationPay 代理支付信息
+     * @param delegationPrivateKey 代理支付者私钥
+     */
+    private String deployContract(String ownerBase58,
+                                  String ownerPrivateKey,
+                                  String contractName,
+                                 long energyPay,
+                                  Contract.DelegationPay delegationPay,
+                                 byte[] delegationPrivateKey)
+            throws CancelException {
+        byte[] owner = WalletApi.decodeFromBase58Check(ownerBase58);
+        byte[] keyBytes = ByteArray.fromHexString(ownerPrivateKey);
+        return deployContract(owner,keyBytes,contractName,energyPay,delegationPay,delegationPrivateKey);
     }
 
     /**
@@ -259,8 +341,13 @@ public class WalletClient {
      * @param energyPay 部署合约需要支付的手续费
      * @return 合约地址
      */
-    public String deployContract(byte[] ownerAddress, byte[] ownerPrivateKey,
-                                 String contractName, long energyPay) throws CancelException {
+    public String deployContract(byte[] ownerAddress,
+                                 byte[] ownerPrivateKey,
+                                 String contractName,
+                                 long energyPay,
+                                 Contract.DelegationPay delegationPay,
+                                 byte[] delegationPrivateKey)
+            throws CancelException {
         List<Object> parameters = Arrays.asList("name", "symbol");
         String argsStr = parametersString(parameters);
         String constructorStr = "constructor(string,string)";
@@ -268,12 +355,20 @@ public class WalletClient {
         String abiStr = Objects.requireNonNull(WalletApi.contractAbi);
         codeStr += Hex.toHexString(Objects.requireNonNull(AbiUtil.encodeInput(constructorStr, argsStr)));
         return deployContract(codeStr, abiStr, contractName,
-                ownerAddress, ownerPrivateKey, energyPay, null, null);
+                ownerAddress, ownerPrivateKey, energyPay,
+                delegationPay,delegationPrivateKey,null, null);
     }
 
-    private String deployContract(String codeStr,String abiStr, String contractName,
-                                  byte[] ownerAddress, byte[] ownerPrivateKey,long energyPay,
-                                  String libraryAddressPair, String compilerVersion)
+    private String deployContract(String codeStr,
+                                  String abiStr,
+                                  String contractName,
+                                  byte[] ownerAddress,
+                                  byte[] ownerPrivateKey,
+                                  long energyPay,
+                                  Contract.DelegationPay delegationPay,
+                                  byte[] delegationPrivateKey,
+                                  String libraryAddressPair,
+                                  String compilerVersion)
             throws CancelException {
         long feeLimit = 0L;
         long value = 0L;
@@ -283,7 +378,7 @@ public class WalletClient {
         String tokenId = "0";
         return walletApiWrapper.deployContract(ownerAddress,ownerPrivateKey,
                 contractName,abiStr,codeStr,feeLimit,value,
-                consumeUserResourcePercent,energyPay,tokenValue,
+                consumeUserResourcePercent,energyPay,delegationPay,delegationPrivateKey,tokenValue,
                 tokenId,libraryAddressPair,compilerVersion);
     }
 
@@ -292,7 +387,8 @@ public class WalletClient {
      * @param contractAddress 合约地址
      * @param ownerAddress 合约拥有者
      */
-    public long totalSupplyFromContract(byte[] contractAddress, byte[] ownerAddress){
+    public long totalSupplyFromContract(byte[] contractAddress,
+                                        byte[] ownerAddress){
         String argsStr = "";
         String method = "totalSupply()";
         byte[] result = callConstantContract(contractAddress,ownerAddress,method,argsStr);
@@ -304,7 +400,8 @@ public class WalletClient {
      * @param contractAddress 合约地址
      * @param ownerAddress NFT拥有者
      */
-    public long balanceFromContract(byte[] contractAddress, byte[] ownerAddress) {
+    public long balanceFromContract(byte[] contractAddress,
+                                    byte[] ownerAddress) {
         String argsStr = "";
         String method = "balanceOf()";
         byte[] result =  callConstantContract(contractAddress, ownerAddress, method, argsStr);
@@ -317,7 +414,9 @@ public class WalletClient {
      * @param ownerAddress NFT拥有者
      * @param index
      */
-    public long tokenByIndexFromContract(byte[] contractAddress, byte[] ownerAddress, long index) {
+    public long tokenByIndexFromContract(byte[] contractAddress,
+                                         byte[] ownerAddress,
+                                         long index) {
         List<Object> parameters = Collections.singletonList(index);
         String argsStr = parametersString(parameters);
         String method = "tokenByIndex(uint256)";
@@ -332,7 +431,9 @@ public class WalletClient {
      * @param ownerAddress 合约拥有者
      * @param tokenId NFT的ID
      */
-    public String ownerFromContract(byte[] contractAddress, byte[] ownerAddress, long tokenId) {
+    public String ownerFromContract(byte[] contractAddress,
+                                    byte[] ownerAddress,
+                                    long tokenId) {
         List<Object> parameters = Collections.singletonList(tokenId);
         String argsStr = parametersString(parameters);
         String method = "ownerOf(uint256)";
@@ -340,8 +441,10 @@ public class WalletClient {
         return WalletApi.encode58Check(result);
     }
 
-    private byte[] callConstantContract(byte[] contractAddress,byte[] ownerAddress,
-                                        String method, String argsStr) {
+    private byte[] callConstantContract(byte[] contractAddress,
+                                        byte[] ownerAddress,
+                                        String method,
+                                        String argsStr) {
         byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, false));
         return walletApiWrapper.triggerConstantContract(ownerAddress, contractAddress, data);
     }
@@ -354,10 +457,17 @@ public class WalletClient {
      * @param tokenId token ID
      * @param metaData token的元数据
      */
-    public boolean mintNftToMyself(byte[] contractOwner, byte[] ownerPrivateKey, byte[] contractAddress,
-                           long tokenId, String metaData, long energyPay)
-            throws IOException, CipherException, CancelException {
-        return mintNft(contractOwner,ownerPrivateKey,contractAddress,contractOwner,tokenId,metaData,energyPay);
+    public boolean mintNftToMyself(byte[] contractOwner,
+                                   byte[] ownerPrivateKey,
+                                   byte[] contractAddress,
+                                   long tokenId,
+                                   String metaData,
+                                   long energyPay,
+                                   Contract.DelegationPay delegationPay,
+                                   byte[] delegationPrivateKey)
+            throws CancelException {
+        return mintNft(contractOwner,ownerPrivateKey,contractAddress,
+                contractOwner,tokenId,metaData,energyPay,delegationPay,delegationPrivateKey);
     }
 
     /**
@@ -369,14 +479,23 @@ public class WalletClient {
      * @param tokenId token ID
      * @param metaData token的元数据
      */
-    public boolean mintNft(byte[] contractOwner, byte[] ownerPrivateKey, byte[] contractAddress,
-                        byte[] mintTo, long tokenId, String metaData, long energyPay)
+    public boolean mintNft(byte[] contractOwner,
+                           byte[] ownerPrivateKey,
+                           byte[] contractAddress,
+                           byte[] mintTo,
+                           long tokenId,
+                           String metaData,
+                           long energyPay,
+                           Contract.DelegationPay delegationPay,
+                           byte[] delegationPrivateKey)
             throws CancelException {
         String method = "mint(address,uint256,string)";
         List<Object> parameters = Arrays.asList(mintTo,tokenId,metaData);
         String argsStr = parametersString(parameters);
         byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, false));
-        return walletApiWrapper.triggerContract(contractOwner,ownerPrivateKey,contractAddress,data,energyPay);
+        return walletApiWrapper.triggerContract(contractOwner,
+                ownerPrivateKey,contractAddress,data,energyPay,
+                delegationPay,delegationPrivateKey);
     }
 
     /**
@@ -387,14 +506,22 @@ public class WalletClient {
      * @param to token接收者
      * @param tokenId 被转移的token ID
      */
-    public boolean transferNft(byte[] tokenOwner, byte[] ownerPrivateKey, byte[] contractAddress,
-                            byte[] to, long tokenId, long energyPay)
-            throws IOException, CipherException, CancelException {
+    public boolean transferNft(byte[] tokenOwner,
+                               byte[] ownerPrivateKey,
+                               byte[] contractAddress,
+                               byte[] to,
+                               long tokenId,
+                               long energyPay,
+                               Contract.DelegationPay delegationPay,
+                               byte[] delegationPrivateKey)
+            throws CancelException {
         String method = "transferFrom(address,address,uint256)";
         List<Object> parameters = Arrays.asList(tokenOwner,to,tokenId);
         String argsStr = parametersString(parameters);
         byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, false));
-        return walletApiWrapper.triggerContract(tokenOwner,ownerPrivateKey,contractAddress,data,energyPay);
+        return walletApiWrapper.triggerContract(tokenOwner,ownerPrivateKey,
+                contractAddress,data,energyPay,
+                delegationPay,delegationPrivateKey);
     }
 
     /**
@@ -403,7 +530,9 @@ public class WalletClient {
      * @param ownerAddress NFT拥有者
      * @param tokenId NFT的ID
      */
-    public String tokenUriFromContract(byte[] contractAddress, byte[] ownerAddress, long tokenId) {
+    public String tokenUriFromContract(byte[] contractAddress,
+                                       byte[] ownerAddress,
+                                       long tokenId) {
         List<Object> parameters = Collections.singletonList(tokenId);
         String argsStr = parametersString(parameters);
         String method = "tokenURI(uint256)";
@@ -419,14 +548,21 @@ public class WalletClient {
      * @param tokenId NFT的ID
      * @param metaData 更新后NFT的元数据
      */
-    public boolean setTokenURI(byte[] tokenOwner, byte[] ownerPrivateKey, byte[] contractAddress,
-                            long tokenId, String metaData, long energyPay)
+    public boolean setTokenURI(byte[] tokenOwner,
+                               byte[] ownerPrivateKey,
+                               byte[] contractAddress,
+                               long tokenId,
+                               String metaData,
+                               long energyPay,
+                               Contract.DelegationPay delegationPay,
+                               byte[] delegationPrivateKey)
             throws CancelException {
         String method = "setTokenURI(uint256,string)";
         List<Object> parameters = Arrays.asList(tokenId,metaData);
         String argsStr = parametersString(parameters);
         byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, false));
-        return walletApiWrapper.triggerContract(tokenOwner,ownerPrivateKey,contractAddress,data,energyPay);
+        return walletApiWrapper.triggerContract(tokenOwner,
+                ownerPrivateKey,contractAddress,data,energyPay,delegationPay,delegationPrivateKey);
     }
 
     private String parametersString(List<Object> parameters) {
