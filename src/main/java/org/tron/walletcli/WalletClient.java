@@ -262,7 +262,7 @@ public class WalletClient {
     }
 
     /**
-     * 商家发布NFT，部署合约，不需要委托支付
+     * 商家发布NFT，部署合约，不需要委托支付，由自己支付
      * @param ownerBase58 NFT发布者
      * @param ownerPrivateKey NFT发布者的私钥
      * @param contractName NFT合约名称
@@ -313,7 +313,7 @@ public class WalletClient {
 
 
     /**
-     * 商家发布NFT，部署合约，可以设置委托支付
+     * 商家发布NFT，部署合约，需要设置支付者信息
      * @param ownerBase58 NFT发布者
      * @param ownerPrivateKey NFT发布者的私钥
      * @param contractName NFT合约名称
@@ -334,7 +334,7 @@ public class WalletClient {
     }
 
     /**
-     * 商家发布NFT，部署合约
+     * 商家发布NFT，部署合约，需要设置支付者信息
      * @param ownerAddress NFT发布者
      * @param ownerPrivateKey NFT发布者的私钥
      * @param contractName NFT合约名称
@@ -412,7 +412,7 @@ public class WalletClient {
      * 根据所有查询NFT的ID
      * @param contractAddress 合约地址
      * @param ownerAddress NFT拥有者
-     * @param index
+     * @param index NFT的索引
      */
     public long tokenByIndexFromContract(byte[] contractAddress,
                                          byte[] ownerAddress,
@@ -450,12 +450,46 @@ public class WalletClient {
     }
 
     /**
+     * 发布NFT，接收者是自己，需要设置代理支付者信息
+     * @param contractOwner  合约owner
+     * @param ownerPrivateKey  合约owner的私钥
+     * @param contractAddress  合约地址
+     * @param tokenId token ID
+     * @param metaData token的元数据
+     * @param energyPay 支付的费用
+     * @param sponsorAddress 支付者地址
+     * @param sponsorPrivateKey 支付者私钥
+     * @param limitPerTransaction 最多支付额度
+     */
+    public boolean mintNftToMyself(byte[] contractOwner,
+                                   byte[] ownerPrivateKey,
+                                   byte[] contractAddress,
+                                   long tokenId,
+                                   String metaData,
+                                   long energyPay,
+                                   byte[] sponsorAddress,
+                                   byte[] sponsorPrivateKey,
+                                   long limitPerTransaction)
+            throws CancelException {
+        Contract.DelegationPay.Builder builder = Contract.DelegationPay.newBuilder();
+        Contract.DelegationPay delegationPay = builder.setSupport(true)
+                .setSponsor(ByteString.copyFrom(sponsorAddress))
+                .setSponsorlimitpertransaction(limitPerTransaction)
+                .build();
+        return mintNftToMyself(contractOwner,ownerPrivateKey,contractAddress,
+                tokenId,metaData,energyPay,delegationPay,sponsorPrivateKey);
+    }
+
+    /**
      * 发布NFT，接收者是自己
      * @param contractOwner  合约owner
      * @param ownerPrivateKey  合约owner的私钥
      * @param contractAddress  合约地址
      * @param tokenId token ID
      * @param metaData token的元数据
+     * @param energyPay 支付的费用
+     * @param delegationPay 委托支付信息
+     * @param delegationPrivateKey 支付者签名
      */
     public boolean mintNftToMyself(byte[] contractOwner,
                                    byte[] ownerPrivateKey,
@@ -471,13 +505,49 @@ public class WalletClient {
     }
 
     /**
-     * 发布NFT，接收者是自己, 可以是他人
+     * 发布NFT，接收者是自己, 可以是他人，需要设置支付者信息
      * @param contractOwner 合约owner
      * @param ownerPrivateKey 合约owner的私钥
      * @param contractAddress 合约地址
      * @param mintTo token接收者地址
      * @param tokenId token ID
      * @param metaData token的元数据
+     * @param energyPay 支付的费用
+     * @param sponsorAddress 支付者地址
+     * @param sponsorPrivateKey 支付者私钥
+     * @param limitPerTransaction 最多支付额度
+     */
+    public boolean mintNft(byte[] contractOwner,
+                           byte[] ownerPrivateKey,
+                           byte[] contractAddress,
+                           byte[] mintTo,
+                           long tokenId,
+                           String metaData,
+                           long energyPay,
+                           byte[] sponsorAddress,
+                           byte[] sponsorPrivateKey,
+                           long limitPerTransaction)
+            throws CancelException {
+        Contract.DelegationPay.Builder builder = Contract.DelegationPay.newBuilder();
+        Contract.DelegationPay delegationPay = builder.setSupport(true)
+                .setSponsor(ByteString.copyFrom(sponsorAddress))
+                .setSponsorlimitpertransaction(limitPerTransaction)
+                .build();
+        return mintNft(contractOwner,ownerPrivateKey,contractAddress,mintTo,
+                tokenId,metaData,energyPay,delegationPay,sponsorPrivateKey);
+    }
+
+
+    /**
+     * 发布NFT，接收者是自己, 可以是他人，需要设置支付者信息
+     * @param contractOwner 合约owner
+     * @param ownerPrivateKey 合约owner的私钥
+     * @param contractAddress 合约地址
+     * @param mintTo token接收者地址
+     * @param tokenId token ID
+     * @param metaData token的元数据
+     * @param delegationPay 委托支付信息
+     * @param delegationPrivateKey 支付者签名
      */
     public boolean mintNft(byte[] contractOwner,
                            byte[] ownerPrivateKey,
@@ -499,12 +569,71 @@ public class WalletClient {
     }
 
     /**
-     * 转移NFT
+     * 发布NFT，接收者是自己, 可以是他人，不需要设置支付者，由自己支付
+     * @param contractOwner 合约owner
+     * @param ownerPrivateKey 合约owner的私钥
+     * @param contractAddress 合约地址
+     * @param mintTo token接收者地址
+     * @param tokenId token ID
+     * @param metaData token的元数据
+     */
+    public boolean mintNft(byte[] contractOwner,
+                           byte[] ownerPrivateKey,
+                           byte[] contractAddress,
+                           byte[] mintTo,
+                           long tokenId,
+                           String metaData,
+                           long energyPay)
+            throws CancelException {
+        String method = "mint(address,uint256,string)";
+        List<Object> parameters = Arrays.asList(mintTo,tokenId,metaData);
+        String argsStr = parametersString(parameters);
+        byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, false));
+        return walletApiWrapper.triggerContract(contractOwner,
+                ownerPrivateKey,contractAddress,data,energyPay,
+                null,null);
+    }
+
+    /**
+     * 转移NFT，需要设置支付者信息
      * @param tokenOwner token拥有者
      * @param ownerPrivateKey token拥有者私钥
      * @param contractAddress 合约地址
      * @param to token接收者
      * @param tokenId 被转移的token ID
+     * @param energyPay 支付的费用
+     * @param sponsorAddress 支付者地址
+     * @param sponsorPrivateKey 支付者私钥
+     * @param limitPerTransaction 最多支付额度
+     */
+    public boolean transferNft(byte[] tokenOwner,
+                               byte[] ownerPrivateKey,
+                               byte[] contractAddress,
+                               byte[] to,
+                               long tokenId,
+                               long energyPay,
+                               byte[] sponsorAddress,
+                               byte[] sponsorPrivateKey,
+                               long limitPerTransaction)
+            throws CancelException {
+        Contract.DelegationPay.Builder builder = Contract.DelegationPay.newBuilder();
+        Contract.DelegationPay delegationPay = builder.setSupport(true)
+                .setSponsor(ByteString.copyFrom(sponsorAddress))
+                .setSponsorlimitpertransaction(limitPerTransaction)
+                .build();
+        return transferNft(tokenOwner,ownerPrivateKey,contractAddress,
+                to,tokenId,energyPay,delegationPay,sponsorPrivateKey);
+    }
+    /**
+     * 转移NFT，需要设置支付者信息
+     * @param tokenOwner token拥有者
+     * @param ownerPrivateKey token拥有者私钥
+     * @param contractAddress 合约地址
+     * @param to token接收者
+     * @param tokenId 被转移的token ID
+     * @param energyPay 支付的费用
+     * @param delegationPay 委托支付信息
+     * @param delegationPrivateKey 支付者签名
      */
     public boolean transferNft(byte[] tokenOwner,
                                byte[] ownerPrivateKey,
@@ -520,8 +649,31 @@ public class WalletClient {
         String argsStr = parametersString(parameters);
         byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, false));
         return walletApiWrapper.triggerContract(tokenOwner,ownerPrivateKey,
-                contractAddress,data,energyPay,
-                delegationPay,delegationPrivateKey);
+                contractAddress,data,energyPay,delegationPay,delegationPrivateKey);
+    }
+
+    /**
+     * 转移NFT，不需要设置支付者信息，由自己支付
+     * @param tokenOwner token拥有者
+     * @param ownerPrivateKey token拥有者私钥
+     * @param contractAddress 合约地址
+     * @param to token接收者
+     * @param tokenId 被转移的token ID
+     * @param energyPay 支付的费用
+     */
+    public boolean transferNft(byte[] tokenOwner,
+                               byte[] ownerPrivateKey,
+                               byte[] contractAddress,
+                               byte[] to,
+                               long tokenId,
+                               long energyPay)
+            throws CancelException {
+        String method = "transferFrom(address,address,uint256)";
+        List<Object> parameters = Arrays.asList(tokenOwner,to,tokenId);
+        String argsStr = parametersString(parameters);
+        byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, false));
+        return walletApiWrapper.triggerContract(tokenOwner,ownerPrivateKey,
+                contractAddress,data,energyPay,null,null);
     }
 
     /**
@@ -541,12 +693,46 @@ public class WalletClient {
     }
 
     /**
-     * 设置Token的元数据
+     * 设置Token的元数据,需要设置支付信息
      * @param tokenOwner token拥有者
      * @param ownerPrivateKey token拥有者私钥
      * @param contractAddress 合约地址
      * @param tokenId NFT的ID
      * @param metaData 更新后NFT的元数据
+     * @param energyPay 支付的费用
+     * @param sponsorAddress 支付者地址
+     * @param sponsorPrivateKey 支付者私钥
+     * @param limitPerTransaction 最多支付额度
+     */
+    public boolean setTokenURI(byte[] tokenOwner,
+                               byte[] ownerPrivateKey,
+                               byte[] contractAddress,
+                               long tokenId,
+                               String metaData,
+                               long energyPay,
+                               byte[] sponsorAddress,
+                               byte[] sponsorPrivateKey,
+                               long limitPerTransaction)
+            throws CancelException {
+        Contract.DelegationPay.Builder builder = Contract.DelegationPay.newBuilder();
+        Contract.DelegationPay delegationPay = builder.setSupport(true)
+                .setSponsor(ByteString.copyFrom(sponsorAddress))
+                .setSponsorlimitpertransaction(limitPerTransaction)
+                .build();
+        return setTokenURI(tokenOwner, ownerPrivateKey, contractAddress,
+                tokenId, metaData, energyPay, delegationPay,sponsorPrivateKey);
+    }
+
+    /**
+     * 设置Token的元数据,需要设置支付信息
+     * @param tokenOwner token拥有者
+     * @param ownerPrivateKey token拥有者私钥
+     * @param contractAddress 合约地址
+     * @param tokenId NFT的ID
+     * @param metaData 更新后NFT的元数据
+     * @param energyPay 支付的费用
+     * @param delegationPay 委托支付信息
+     * @param delegationPrivateKey 支付者签名
      */
     public boolean setTokenURI(byte[] tokenOwner,
                                byte[] ownerPrivateKey,
@@ -561,8 +747,32 @@ public class WalletClient {
         List<Object> parameters = Arrays.asList(tokenId,metaData);
         String argsStr = parametersString(parameters);
         byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, false));
-        return walletApiWrapper.triggerContract(tokenOwner,
-                ownerPrivateKey,contractAddress,data,energyPay,delegationPay,delegationPrivateKey);
+        return walletApiWrapper.triggerContract(tokenOwner,ownerPrivateKey,
+                contractAddress,data,energyPay,delegationPay,delegationPrivateKey);
+    }
+
+    /**
+     * 设置Token的元数据,不需要设置支付信息，由自己支付
+     * @param tokenOwner token拥有者
+     * @param ownerPrivateKey token拥有者私钥
+     * @param contractAddress 合约地址
+     * @param tokenId NFT的ID
+     * @param metaData 更新后NFT的元数据
+     * @param energyPay 支付的费用
+     */
+    public boolean setTokenURI(byte[] tokenOwner,
+                               byte[] ownerPrivateKey,
+                               byte[] contractAddress,
+                               long tokenId,
+                               String metaData,
+                               long energyPay)
+            throws CancelException {
+        String method = "setTokenURI(uint256,string)";
+        List<Object> parameters = Arrays.asList(tokenId,metaData);
+        String argsStr = parametersString(parameters);
+        byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, false));
+        return walletApiWrapper.triggerContract(tokenOwner,ownerPrivateKey,
+                contractAddress,data,energyPay,null,null);
     }
 
     private String parametersString(List<Object> parameters) {
