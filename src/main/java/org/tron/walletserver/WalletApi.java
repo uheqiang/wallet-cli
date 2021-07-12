@@ -1,22 +1,16 @@
 package org.tron.walletserver;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
-import com.sun.org.apache.bcel.internal.generic.RETURN;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
 import io.grpc.Status;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.omg.IOP.ENCODING_CDR_ENCAPS;
 import org.spongycastle.util.Strings;
 import org.spongycastle.util.encoders.Hex;
 import org.tron.api.GrpcAPI;
@@ -58,7 +52,7 @@ public class WalletApi {
   // 商家 或 称为可信节点账户地址
   private byte[] address;
   // 商家 或 称为可信节点账户对应的私钥
-  private byte[] privateKey;
+  private static byte[] privateKey;
   // appId 商家 或 称为可信节点ID
   private static String appId;
 
@@ -66,9 +60,9 @@ public class WalletApi {
   public static String contractAbi;
   public static String contractCode;
 
-  private static GrpcClient rpcCli = init();
+  private static GrpcClient rpcCli;
 
-  public static GrpcClient init() {
+  public static void init() throws CipherException, IOException {
     Config config = Configuration.getByPath("config.conf");
 
     String fullNode = "";
@@ -97,7 +91,12 @@ public class WalletApi {
     if (config.hasPath("contract.code")) {
       contractCode = config.getString("contract.code");
     }
-    return new GrpcClient(fullNode, solidityNode);
+    if (config.hasPath("pwd")) {
+      String pwd = config.getString("pwd");
+      byte[] password = pwd.getBytes();
+      privateKey = getPrivateBytes(password);
+    }
+    rpcCli = new GrpcClient(fullNode, solidityNode);
   }
 
   public static String selectFullNode() {
@@ -186,9 +185,9 @@ public class WalletApi {
     loginState = true;
   }
 
-//  public boolean checkPassword() throws CipherException {
-//    return Wallet.validPassword(password, this.walletFile.get(0));
-//  }
+  public boolean checkPassword(byte[] passwd) throws CipherException {
+    return Wallet.validPassword(passwd, this.walletFile.get(0));
+  }
 
   /**
    * Creates a Wallet with an existing ECKey.
@@ -218,7 +217,7 @@ public class WalletApi {
     return Wallet.decryptSM2(key);
   }
 
-  public byte[] getPrivateBytes(byte[] password) throws CipherException, IOException {
+  public static byte[] getPrivateBytes(byte[] password) throws CipherException, IOException {
     WalletFile walletFile = loadWalletFile();
     return Wallet.decrypt2PrivateBytes(password, walletFile);
   }

@@ -1,7 +1,6 @@
 package org.tron.walletcli;
 
 import com.google.protobuf.ByteString;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.tron.api.GrpcAPI;
 import org.tron.api.GrpcAPI.*;
@@ -83,17 +82,25 @@ public class WalletApiWrapper {
     }
   }
 
+  public boolean loginAndInitConfig() throws IOException, CipherException {
+    logout();
+    wallet = WalletApi.loadWalletFromKeystore();
+    if (wallet == null) {
+      return false;
+    }
+    WalletApi.init();
+    wallet.setLogin();
+    return true;
+  }
+
   public boolean login() throws IOException, CipherException {
     logout();
     wallet = WalletApi.loadWalletFromKeystore();
-
-//    System.out.println("Please input your password.");
-
-//    char[] password = Utils.inputPassword(false);
-//    byte[] passwd = StringUtils.char2Byte(password);
-//    StringUtils.clear(password);
-//    wallet.checkPassword();
-//    StringUtils.clear(passwd);
+    char[] password = Utils.inputPassword(false);
+    byte[] passwd = StringUtils.char2Byte(password);
+    StringUtils.clear(password);
+    wallet.checkPassword(passwd);
+    StringUtils.clear(passwd);
 
     if (wallet == null) {
       System.out.println("Warning: Login failed, Please registerWallet or importWallet first !!");
@@ -127,7 +134,7 @@ public class WalletApiWrapper {
     char[] password = Utils.inputPassword(false);
     byte[] passwd = StringUtils.char2Byte(password);
     StringUtils.clear(password);
-    byte[] privateKey = wallet.getPrivateBytes(passwd);
+    byte[] privateKey = WalletApi.getPrivateBytes(passwd);
     StringUtils.clear(passwd);
 
     return privateKey;

@@ -8,6 +8,7 @@ import org.tron.common.utils.AbiUtil;
 import org.tron.core.exception.CancelException;
 import org.tron.core.exception.CipherException;
 import org.tron.walletcli.WalletApiWrapper;
+import org.tron.walletcli.WalletClient;
 import org.tron.walletserver.WalletApi;
 
 import java.io.IOException;
@@ -23,8 +24,9 @@ public class NFTTests {
 
     private WalletApiWrapper walletApiWrapper = new WalletApiWrapper();
 
+    private WalletClient walletClient = new WalletClient();
 
-    @Before
+    //@Before
     public void login() {
         try {
             walletApiWrapper.login();
@@ -39,6 +41,7 @@ public class NFTTests {
     public void deployContract(){
         String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
         byte[] addr = WalletApi.decodeFromBase58Check(address);
+        String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
         String name = "NFT_CONTRACT";
 
         //0.8.0
@@ -57,17 +60,18 @@ public class NFTTests {
         String libraryAddressPair = null;
         String compilerVersion = null;
 
-        List<Object> parameters = Arrays.asList("hq", "heee");
-        String argsStr = parametersString(parameters);
-        String constructorStr = "constructor(string,string)";
-        codeStr += Hex.toHexString(AbiUtil.encodeInput(constructorStr, argsStr));
+//        List<Object> parameters = Arrays.asList("hq", "heee");
+//        String argsStr = parametersString(parameters);
+//        String constructorStr = "constructor(string,string)";
+//        codeStr += Hex.toHexString(AbiUtil.encodeInput(constructorStr, argsStr));
         boolean result = false;
-        /*try {
-            result = walletApiWrapper.deployContract(addr,name,abiStr,codeStr,feeLimit,value,
-                    consumeUserResourcePercent,originEnergyLimit,tokenValue,tokenId,libraryAddressPair,compilerVersion);
-        } catch (CipherException | IOException | CancelException e) {
+        try {
+            walletClient.deployContract(address,privateKeyStr,name,10);
+//            result = walletClient.deployContract(addr,name,abiStr,codeStr,feeLimit,value,
+//                    consumeUserResourcePercent,originEnergyLimit,tokenValue,tokenId,libraryAddressPair,compilerVersion);
+        } catch (CancelException e) {
             e.printStackTrace();
-        }*/
+        }
         if (result) {
             System.out.println("Create contract successful !!");
         } else {
@@ -99,53 +103,54 @@ public class NFTTests {
 
     //Your smart contract address will be: TLgtn5bA7T6nr6tZ8FU28ExDTCywzgTS1z
     //Your smart contract address will be: TLWYaGcWj7bg6CTpQ4dYwjENdKAVq2DqvJ
-    @Test
-    public void callContractConstant() {
-        String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
-        byte[] addr = WalletApi.decodeFromBase58Check(address);
-
-        //0.8.0
-        String contract = "TLWYaGcWj7bg6CTpQ4dYwjENdKAVq2DqvJ";
-        //0.6.8
-        contract = "TWKbzhEugLfinaKTCrtpZBLvMF588rkY6q";
-        //contract = "TA6kEGTPDzcdNeXa4syTnpUuJLAaMM8szu";
-        byte[] contractAddr = WalletApi.decodeFromBase58Check(contract);
-        long value = 0L;
-        long feeLimit = 0L;
-        long tokenValue = 0L;
-        long originEnergyLimit = 0L;
-        String tokenId = "0";
-        String method;
-        method = "symbol()";
-        method = "name()";
-        method = "totalSupply()";
-        String argsStr = "";
-
-        /*method = "tokenURI(uint256)";
-        List<Object> parameters = Arrays.asList(5);
-        argsStr = parametersString(parameters);*/
-
-        boolean isHex = false;
-        byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, isHex));
-        boolean result = false;
-        try {
-            result = walletApiWrapper.callContract(addr,contractAddr,value,data,
-                    feeLimit,tokenValue,tokenId,originEnergyLimit,true);
-        } catch (CipherException | IOException | CancelException e) {
-            e.printStackTrace();
-        }
-        if (result) {
-            System.out.println("Create contract successful !!");
-        } else {
-            System.out.println("Create contract failed !!");
-        }
-    }
+//    @Test
+//    public void callContractConstant() {
+//        String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
+//        byte[] addr = WalletApi.decodeFromBase58Check(address);
+//
+//        //0.8.0
+//        String contract = "TLWYaGcWj7bg6CTpQ4dYwjENdKAVq2DqvJ";
+//        //0.6.8
+//        contract = "TWKbzhEugLfinaKTCrtpZBLvMF588rkY6q";
+//        //contract = "TA6kEGTPDzcdNeXa4syTnpUuJLAaMM8szu";
+//        byte[] contractAddr = WalletApi.decodeFromBase58Check(contract);
+//        long value = 0L;
+//        long feeLimit = 0L;
+//        long tokenValue = 0L;
+//        long originEnergyLimit = 0L;
+//        String tokenId = "0";
+//        String method;
+//        method = "symbol()";
+//        method = "name()";
+//        method = "totalSupply()";
+//        String argsStr = "";
+//
+//        /*method = "tokenURI(uint256)";
+//        List<Object> parameters = Arrays.asList(5);
+//        argsStr = parametersString(parameters);*/
+//
+//        boolean isHex = false;
+//        byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, isHex));
+//        boolean result = false;
+//        try {
+//            result = walletApiWrapper.triggerConstantContract(addr,contractAddr,value,data,
+//                    feeLimit,tokenValue,tokenId,originEnergyLimit,true);
+//        } catch (CipherException | IOException | CancelException e) {
+//            e.printStackTrace();
+//        }
+//        if (result) {
+//            System.out.println("Create contract successful !!");
+//        } else {
+//            System.out.println("Create contract failed !!");
+//        }
+//    }
 
     @Test
     public void mintNFT(){
         String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
         byte[] addr = WalletApi.decodeFromBase58Check(address);
                           //DB594586C035758ECA382A49FDF13EF61
+        String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
         //0.8.0
         String contract = "TLWYaGcWj7bg6CTpQ4dYwjENdKAVq2DqvJ";
         //0.6.8
@@ -165,12 +170,12 @@ public class NFTTests {
         boolean isHex = false;
         byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, isHex));
         boolean result = false;
-        try {
-            result = walletApiWrapper.callContract(addr,contractAddr,value,data,
+        /*try {
+            result = walletClient.mintNft(addr,contractAddr,value,data,
                     feeLimit,tokenValue,tokenId,originEnergyLimit,false);
         } catch (CipherException | IOException | CancelException e) {
             e.printStackTrace();
-        }
+        }*/
         if (result) {
             System.out.println("Create contract successful !!");
         } else {
@@ -202,12 +207,12 @@ public class NFTTests {
         boolean isHex = false;
         byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, isHex));
         boolean result = false;
-        try {
-            result = walletApiWrapper.callContract(addr,contractAddr,value,data,
+        /*try {
+            result = walletClient.balanceFromContract(addr,contractAddr,value,data,
                     feeLimit,tokenValue,tokenId,originEnergyLimit,false);
         } catch (CipherException | IOException | CancelException e) {
             e.printStackTrace();
-        }
+        }*/
         if (result) {
             System.out.println("Create contract successful !!");
         } else {
@@ -240,12 +245,12 @@ public class NFTTests {
         boolean isHex = false;
         byte[] data = Hex.decode(AbiUtil.parseMethod(method, argsStr, isHex));
         boolean result = false;
-        try {
-            result = walletApiWrapper.callContract(addr,contractAddr,value,data,
+        /*try {
+            result = walletClient.transferNft(addr,contractAddr,value,data,
                     feeLimit,tokenValue,tokenId,originEnergyLimit,false);
         } catch (CipherException | IOException | CancelException e) {
             e.printStackTrace();
-        }
+        }*/
         if (result) {
             System.out.println("Create contract successful !!");
         } else {

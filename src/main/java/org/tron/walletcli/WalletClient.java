@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.spongycastle.util.Strings;
 import org.spongycastle.util.encoders.Hex;
-import org.tron.common.crypto.SignUtils;
 import org.tron.common.entity.AccountInfo;
 import org.tron.common.utils.AbiUtil;
 import org.tron.common.utils.ByteArray;
@@ -14,7 +13,6 @@ import org.tron.core.exception.CancelException;
 import org.tron.core.exception.CipherException;
 import org.tron.core.exception.DecodingException;
 import org.tron.core.exception.TronException;
-import org.tron.keystore.Wallet;
 import org.tron.protos.Contract;
 import org.tron.protos.Protocol;
 import org.tron.walletserver.WalletApi;
@@ -29,9 +27,14 @@ import java.util.*;
 @Slf4j
 public class WalletClient {
 
-    private WalletApiWrapper walletApiWrapper = new WalletApiWrapper();
+    private WalletApiWrapper walletApiWrapper;
 
     private final static String ASSET_ID = "1000001";
+
+    public boolean login() throws IOException, CipherException {
+        walletApiWrapper = new WalletApiWrapper();
+        return walletApiWrapper.loginAndInitConfig();
+    }
 
     /**
      * 发布TRC10资产
@@ -63,6 +66,33 @@ public class WalletClient {
                               long totalSupply)
             throws IOException, CipherException, CancelException {
         return walletApiWrapper.assetIssue(owner,ownerKey,name,totalSupply);
+    }
+
+    /**
+     * 通过资产ID获取资产信息
+     * @param assetId 资产ID
+     */
+    public Contract.AssetIssueContract getAssetIssueById(String assetId) {
+        return walletApiWrapper.getAssetIssueById(assetId);
+    }
+
+    /**
+     * 通过资产ID获取资产信息
+     * @param assetName 资产名称
+     */
+    public Contract.AssetIssueContract getAssetIssueByName(String assetName) {
+        return walletApiWrapper.getAssetIssueByName(assetName);
+    }
+
+    /**
+     * 增发TRC10
+     * @param ownerAddress 增发地址，只有发布者才能增发
+     * @param assetId id
+     * @param mintTokens 增发数量
+     */
+    public boolean updateAsset(byte[] ownerAddress, String assetId, long mintTokens)
+            throws IOException, CipherException, CancelException {
+        return walletApiWrapper.updateAsset(ownerAddress,assetId,mintTokens);
     }
 
     /**
