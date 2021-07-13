@@ -2,6 +2,8 @@ package org.tron.common.entity;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.tron.common.utils.JsonFormat;
+import org.tron.common.utils.JsonFormatUtil;
 import org.tron.protos.Protocol.PersonalInfo;
 
 import java.util.Map;
@@ -45,14 +47,14 @@ public class AccountInfo {
 
     @Override
     public String toString() {
-        return "AccountInfo{" +
-                "addressBase58='" + addressBase58 + '\'' +
-                ", createTime='" + createTime + '\'' +
-                ", assetIssuedId='" + assetIssuedId + '\'' +
-                ", assetIssuedName='" + assetIssuedName + '\'' +
-                ", balanceOfEnergy=" + balanceOfEnergy +
-                ", personalInfo=" + personalInfo +
-                ", assetV2=" + assetV2 +
+        return "AccountInfo{" + "\n" +
+                " addressBase58='" + addressBase58 + '\'' + "," + "\n" +
+                " createTime='" + createTime + '\'' + "," + "\n" +
+                " assetIssuedId='" + assetIssuedId + '\'' +  "," + "\n" +
+                " assetIssuedName='" + assetIssuedName + '\'' + "," + "\n" +
+                " balanceOfEnergy=" + balanceOfEnergy +  "," + "\n" +
+                " personalInfo=" + JsonFormatUtil.formatJson(JsonFormat.printToString(personalInfo, true)) + "," + "\n" +
+                " assetV2=" + assetV2 + "\n" +
                 '}';
     }
 }

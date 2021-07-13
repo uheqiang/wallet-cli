@@ -50,14 +50,15 @@ public class AccountTests {
     public void createAccountPersonal() {
         String userAddressStr = "TMXnRunmpzLgdP4sG3mYMkZZ8Q6f9DV847";
         String userPrivateStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
+        //byte[] userPrivateKey = ByteArray.fromHexString(userPrivateStr);
 
-        String ownerAddressStr = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
-        String ownerPrivateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
-        byte[] ownerPrivateKey = ByteArray.fromHexString(ownerPrivateKeyStr);
+        String businessAddressStr = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
+        String businessPrivateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
+        byte[] ownerPrivateKey = ByteArray.fromHexString(businessPrivateKeyStr);
         String identity = "This is my identity";
         boolean result = false;
         try {
-            result = walletClient.createAccount(WalletApi.decodeFromBase58Check(ownerAddressStr),
+            result = walletClient.createAccount(WalletApi.decodeFromBase58Check(businessAddressStr),
                     ownerPrivateKey,
                     WalletApi.decodeFromBase58Check(userAddressStr),
                     identity);

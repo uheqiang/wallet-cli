@@ -556,7 +556,16 @@ public class Client {
     }
 
     String identity = parameters[index++];
-    String result = walletApiWrapper.createBusiness(businessAddress,identity);
+    String result = null;
+    try {
+      result = walletApiWrapper.createBusiness(businessAddress,identity);
+    } catch (IOException e) {
+      e.printStackTrace();
+    } catch (CipherException e) {
+      e.printStackTrace();
+    } catch (CancelException e) {
+      e.printStackTrace();
+    }
     System.out.println("CreateBusiness successful !!, ID: " + result);
   }
 

@@ -287,7 +287,8 @@ public class WalletClient {
      * 注册商家
      * @return 商家的ID
      */
-    public String createBusiness(byte[] address,String identity) {
+    public String createBusiness(byte[] address,String identity)
+            throws CipherException, IOException, CancelException {
         return walletApiWrapper.createBusiness(address, identity);
     }
 

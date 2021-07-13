@@ -187,7 +187,8 @@ public class WalletApiWrapper {
     return wallet.createAccount(owner, ownerPrivateKey, address, identity);
   }
 
-  public String createBusiness(byte[] address,String identity) {
+  public String createBusiness(byte[] address,String identity)
+          throws IOException, CipherException, CancelException {
     return wallet.createBusiness(address,identity);
   }
 

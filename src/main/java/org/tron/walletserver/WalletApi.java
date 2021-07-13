@@ -400,7 +400,7 @@ public class WalletApi {
     }
   }
 
-/*  private Transaction signTransaction(Transaction transaction)
+  private Transaction signTransaction(Transaction transaction)
       throws CipherException, IOException, CancelException {
     if (transaction.getRawData().getTimestamp() == 0) {
       transaction = TransactionUtils.setTimestamp(transaction);
@@ -412,16 +412,16 @@ public class WalletApi {
     transaction = TransactionUtils.setPermissionId(transaction, tipsString);
     WalletFile walletFile = selcetWalletFileE();
     if (isEckey) {
-      transaction = TransactionUtils.sign(transaction, this.getEcKey(walletFile, password));
+      transaction = TransactionUtils.sign(transaction, this.getEcKey(privateKey));
     } else {
-      transaction = TransactionUtils.sign(transaction, this.getSM2(walletFile, password));
+      transaction = TransactionUtils.sign(transaction, this.getSM2(privateKey));
     }
     TransactionSignWeight weight = getTransactionSignWeight(transaction);
     if (weight.getResult().getCode() == response_code.NOT_ENOUGH_PERMISSION) {
       throw new CancelException(weight.getResult().getMessage());
     }
     return transaction;
-  }*/
+  }
 
   private boolean processTransactionExtention(TransactionExtention transactionExtention, byte[] privateKey)
           throws CancelException {
@@ -448,7 +448,8 @@ public class WalletApi {
     return rpcCli.broadcastTransaction(transaction);
   }
 
-  private boolean processTransactionExtention(TransactionExtention transactionExtention) {
+  private boolean processTransactionExtention(TransactionExtention transactionExtention)
+          throws IOException, CipherException, CancelException {
     if (transactionExtention == null) {
       return false;
     }
@@ -470,7 +471,7 @@ public class WalletApi {
 
     //System.out.println(Utils.printTransactionExceptId(transactionExtention.getTransaction()));
     //System.out.println("before sign transaction hex string is " + ByteArray.toHexString(transaction.toByteArray()));
-    //transaction = signTransaction(transaction);
+    transaction = signTransaction(transaction);
     return rpcCli.broadcastTransaction(transaction);
   }
 
@@ -614,7 +615,8 @@ public class WalletApi {
   /**
    * 注册商家 或称为可信节点
    */
-  public String createBusiness(byte[] address,String identity) {
+  public String createBusiness(byte[] address,String identity)
+          throws CipherException, IOException, CancelException {
     // 分布式生成全局为唯一ID
     UUID uuid = UUID.randomUUID();
     String appId = uuid.toString().replace("-","");
