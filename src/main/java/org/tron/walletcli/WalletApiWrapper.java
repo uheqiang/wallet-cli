@@ -144,6 +144,10 @@ public class WalletApiWrapper {
     return WalletApi.encode58Check(wallet.getAddress());
   }
 
+  public Account queryAccount(byte[] address) {
+    return WalletApi.queryAccount(address);
+  }
+
   public Account queryAccount() {
     return wallet.queryAccount();
   }
@@ -183,8 +187,8 @@ public class WalletApiWrapper {
     return wallet.createAccount(owner, ownerPrivateKey, address, identity);
   }
 
-  public String createBusiness() {
-    return wallet.createBusiness();
+  public String createBusiness(byte[] address,String identity) {
+    return wallet.createBusiness(address,identity);
   }
 
   public AddressPrKeyPairMessage generateAddress() {

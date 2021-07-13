@@ -4,10 +4,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.tron.common.utils.JsonFormat;
 import org.tron.common.utils.JsonFormatUtil;
-import org.tron.core.exception.CancelException;
 import org.tron.core.exception.CipherException;
 import org.tron.protos.Protocol;
 import org.tron.walletcli.WalletApiWrapper;
+import org.tron.walletserver.WalletApi;
 
 import java.io.IOException;
 
@@ -30,13 +30,20 @@ public class BusinessTests {
 
     @Test
     public void createAccountBusiness() {
-        String result = walletApiWrapper.createBusiness();
+        String ownerAddressStr = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
+        //String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
+        byte[] ownerAddress = WalletApi.decodeFromBase58Check(ownerAddressStr);
+        String identity = "This is my identity";
+        String result = walletApiWrapper.createBusiness(ownerAddress, identity);
         System.out.println("business id: " + result);
     }
 
     @Test
     public void queryAccountBusiness(){
-        Protocol.Account account = walletApiWrapper.queryAccount();
+        String ownerAddressStr = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
+        //String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
+        byte[] ownerAddress = WalletApi.decodeFromBase58Check(ownerAddressStr);
+        Protocol.Account account = walletApiWrapper.queryAccount(ownerAddress);
         System.out.println(JsonFormatUtil.formatJson(JsonFormat.printToString(account, true)));
     }
 

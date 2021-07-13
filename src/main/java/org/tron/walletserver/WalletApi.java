@@ -347,7 +347,7 @@ public class WalletApi {
   }
 
   public static Account queryAccount(byte[] address) {
-    return rpcCli.queryAccount(address); // call rpc
+    return rpcCli.queryAccount(address);
   }
 
   public static Account queryAccountById(String accountId) {
@@ -614,11 +614,14 @@ public class WalletApi {
   /**
    * 注册商家 或称为可信节点
    */
-  public String createBusiness() {
+  public String createBusiness(byte[] address,String identity) {
     // 分布式生成全局为唯一ID
     UUID uuid = UUID.randomUUID();
     String appId = uuid.toString().replace("-","");
-    PersonalInfo info = PersonalInfo.newBuilder().setAppID(appId).build();
+    if (StringUtils.isEmpty(identity)) {
+      identity = "This is my identity!";
+    }
+    PersonalInfo info = PersonalInfo.newBuilder().setAppID(appId).setIdentity(identity).build();
     Contract.BusinessCreateContract contract = createBusinessCreateContract(address, info);
     TransactionExtention transactionExtention = rpcCli.createBusiness2(contract);
     if (processTransactionExtention(transactionExtention)) {

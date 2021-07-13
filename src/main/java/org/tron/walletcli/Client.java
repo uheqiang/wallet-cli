@@ -4,7 +4,6 @@ import com.beust.jcommander.JCommander;
 import com.google.common.primitives.Longs;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import io.netty.util.internal.StringUtil;
 import org.apache.commons.lang3.ArrayUtils;
 import org.bouncycastle.util.encoders.Hex;
 import org.jline.reader.Completer;
@@ -22,8 +21,6 @@ import org.tron.common.utils.Utils;
 import org.tron.core.exception.CancelException;
 import org.tron.core.exception.CipherException;
 import org.tron.core.exception.EncodingException;
-import org.tron.core.zen.ShieldedAddressInfo;
-import org.tron.core.zen.ShieldedWrapper;
 import org.tron.keystore.StringUtils;
 import org.tron.protos.Contract.AssetIssueContract;
 import org.tron.protos.Protocol.*;
@@ -541,8 +538,25 @@ public class Client {
   }
 
 
-  private void createBusiness() {
-    String result = walletApiWrapper.createBusiness();
+  private void createBusiness(String[] parameters) {
+    if (parameters == null || (parameters.length != 1 && parameters.length != 2)) {
+      System.out.println("CreateWitness needs 1 parameter using the following syntax: ");
+      System.out.println("CreateWitness [OwnerAddress] Url");
+      return;
+    }
+
+    int index = 0;
+    byte[] businessAddress = null;
+    if (parameters.length == 2) {
+      businessAddress = WalletApi.decodeFromBase58Check(parameters[index++]);
+      if (businessAddress == null) {
+        System.out.println("Invalid OwnerAddress.");
+        return;
+      }
+    }
+
+    String identity = parameters[index++];
+    String result = walletApiWrapper.createBusiness(businessAddress,identity);
     System.out.println("CreateBusiness successful !!, ID: " + result);
   }
 
@@ -1358,32 +1372,6 @@ public class Client {
     }
   }
 
-  private boolean isFromPublicAddress(String[] parameters) {
-    if (Utils.isNumericString(parameters[0])) {
-      if (Long.valueOf(parameters[0]) > 0) {
-        return true;
-      }
-    } else {
-      if (Long.valueOf(parameters[1]) > 0) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private boolean isFromShieldedNote(String[] parameters) {
-    if (Utils.isNumericString(parameters[0])) {
-      if (Long.valueOf(parameters[1]) > 0) {
-        return true;
-      }
-    } else {
-      if (Long.valueOf(parameters[2]) > 0) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   private void getSpendingKey() {
     Optional<BytesMessage> sk = WalletApi.getSpendingKey();
     if (!sk.isPresent()) {
@@ -1611,7 +1599,7 @@ public class Client {
               break;
             }
             case "createbusiness": {
-              createBusiness();
+              createBusiness(parameters);
               break;
             }
             case "createwitness": {

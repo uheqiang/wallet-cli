@@ -12,7 +12,6 @@ import org.tron.core.exception.CancelException;
 import org.tron.core.exception.CipherException;
 import org.tron.core.exception.TronException;
 import org.tron.protos.Protocol;
-import org.tron.walletcli.WalletApiWrapper;
 import org.tron.walletcli.WalletClient;
 import org.tron.walletserver.WalletApi;
 
@@ -25,35 +24,46 @@ import java.io.IOException;
  */
 public class AccountTests {
 
-    private WalletApiWrapper walletApiWrapper = new WalletApiWrapper();
+    private WalletClient walletClient = new WalletClient();
 
     @Before
     public void login() {
         try {
-            walletApiWrapper.login();
+            walletClient.login();
         } catch (IOException | CipherException e) {
             e.printStackTrace();
         }
     }
 
-
     @Test
-    public void createAccountPersonal() {
+    public void createAccount() {
         ECKey ecKey1 = new ECKey(Utils.getRandom());
         byte[] address = ecKey1.getAddress();
         String addressStr = WalletApi.encode58Check(address);
         System.out.println(addressStr);
         String privateKey = ByteArray.toHexString(ecKey1.getPrivKeyBytes());
         System.out.println(privateKey);
-        //String addressSt = "TMXnRunmpzLgdP4sG3mYMkZZ8Q6f9DV847";
-        //0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda
-        String identity = "2";
+    }
+
+
+    @Test
+    public void createAccountPersonal() {
+        String userAddressStr = "TMXnRunmpzLgdP4sG3mYMkZZ8Q6f9DV847";
+        String userPrivateStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
+
+        String ownerAddressStr = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
+        String ownerPrivateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
+        byte[] ownerPrivateKey = ByteArray.fromHexString(ownerPrivateKeyStr);
+        String identity = "This is my identity";
         boolean result = false;
-        /*try {
-            result = walletApiWrapper.createAccount(address*//*WalletApi.decodeFromBase58Check(addressSt)*//*, identity);
+        try {
+            result = walletClient.createAccount(WalletApi.decodeFromBase58Check(ownerAddressStr),
+                    ownerPrivateKey,
+                    WalletApi.decodeFromBase58Check(userAddressStr),
+                    identity);
         } catch (CipherException | IOException | CancelException e) {
             e.printStackTrace();
-        }*/
+        }
         if (result) {
             System.out.println("CreateAccount successful !!");
         } else {
@@ -68,11 +78,9 @@ public class AccountTests {
     @Test
     public void queryAccountPersonal(){
         String address = "TMXnRunmpzLgdP4sG3mYMkZZ8Q6f9DV847";
-        address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
-        address = "TWKbzhEugLfinaKTCrtpZBLvMF588rkY6q";
-//        byte[] addr = WalletApi.decodeFromBase58Check(address);
-//        Protocol.Account account = WalletApi.queryAccount(addr);
-//        System.out.println(JsonFormatUtil.formatJson(JsonFormat.printToString(account, true)));
+        byte[] addr = WalletApi.decodeFromBase58Check(address);
+        Protocol.Account account = WalletApi.queryAccount(addr);
+        System.out.println(JsonFormatUtil.formatJson(JsonFormat.printToString(account, true)));
 
         try {
             AccountInfo account1 = new WalletClient().getAccount(address);
