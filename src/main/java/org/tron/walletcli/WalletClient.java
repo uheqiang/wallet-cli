@@ -31,9 +31,44 @@ public class WalletClient {
 
     private final static String ASSET_ID = "1000001";
 
-    public boolean login() throws IOException, CipherException {
+    public boolean init() throws IOException, CipherException {
         walletApiWrapper = new WalletApiWrapper();
-        return walletApiWrapper.loginAndInitConfig();
+        return walletApiWrapper.initConfig();
+    }
+
+    /**
+     * 注册账户，生成密钥文件
+     * @param password 密钥文件密码
+     */
+    public String registerWallet(String password) throws CipherException, IOException {
+        return walletApiWrapper.registerWallet(password.toCharArray());
+    }
+
+    /**
+     * 导入密钥进文件
+     * @param password 密钥文件密码
+     * @param priKey 私钥
+     */
+    public String importWallet(String password, byte[] priKey) throws CipherException, IOException {
+        return walletApiWrapper.importWallet(password.toCharArray(), priKey);
+    }
+
+    /**
+     * 从密钥文件中导出私钥
+     * @param password 密钥文件密码
+     */
+    public byte[] exportPrivateKey(String password) throws CipherException, IOException {
+        byte[] passwd = org.tron.keystore.StringUtils.char2Byte(password.toCharArray());
+        byte[] privateKey = WalletApi.getPrivateBytes(passwd);
+        return privateKey;
+    }
+
+    /**
+     * 从密钥文件中导出地址
+     */
+    public byte[] exportAddress() throws IOException {
+        WalletApi walletApi = WalletApi.loadWalletFromKeystore();
+        return walletApi.getAddress();
     }
 
     /**
@@ -284,12 +319,12 @@ public class WalletClient {
     }
 
     /**
-     * 注册商家
+     * 注册商家或可信节点
      * @return 商家的ID
      */
-    public String createBusiness(byte[] address,String identity)
-            throws CipherException, IOException, CancelException {
-        return walletApiWrapper.createBusiness(address, identity);
+    public boolean createBusiness(byte[] address,byte[] privateKey,String identity)
+            throws CancelException {
+        return walletApiWrapper.createBusiness(address, privateKey, identity);
     }
 
     /**

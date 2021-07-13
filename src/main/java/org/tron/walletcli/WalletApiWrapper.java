@@ -34,7 +34,7 @@ public class WalletApiWrapper {
     StringUtils.clear(passwd);
 
     String keystoreName = WalletApi.store2Keystore(walletFile);
-    logout();
+//    logout();
     return keystoreName;
   }
 
@@ -52,13 +52,13 @@ public class WalletApiWrapper {
     StringUtils.clear(passwd);
 
     String keystoreName = WalletApi.store2Keystore(walletFile);
-    logout();
+//    logout();
     return keystoreName;
   }
 
   public boolean changePassword(char[] oldPassword, char[] newPassword)
       throws IOException, CipherException {
-    logout();
+//    logout();
     if (!WalletApi.passwordValid(newPassword)) {
       System.out.println("Warning: ChangePassword failed, NewPassword is invalid !!");
       return false;
@@ -82,41 +82,36 @@ public class WalletApiWrapper {
     }
   }
 
-  public boolean loginAndInitConfig() throws IOException, CipherException {
-    logout();
-    wallet = WalletApi.loadWalletFromKeystore();
-    if (wallet == null) {
-      return false;
-    }
+  public boolean initConfig() throws IOException, CipherException {
     WalletApi.init();
-    wallet.setLogin();
+    wallet = new WalletApi();
     return true;
   }
 
-  public boolean login() throws IOException, CipherException {
-    logout();
-    wallet = WalletApi.loadWalletFromKeystore();
-    char[] password = Utils.inputPassword(false);
-    byte[] passwd = StringUtils.char2Byte(password);
-    StringUtils.clear(password);
-    wallet.checkPassword(passwd);
-    StringUtils.clear(passwd);
-
-    if (wallet == null) {
-      System.out.println("Warning: Login failed, Please registerWallet or importWallet first !!");
-      return false;
-    }
-    wallet.setLogin();
-    return true;
-  }
-
-  public void logout() {
-    if (wallet != null) {
-      wallet.logout();
-      wallet = null;
-    }
-    //Neddn't logout
-  }
+//  public boolean login() throws IOException, CipherException {
+//    logout();
+//    wallet = WalletApi.loadWalletFromKeystore();
+//    char[] password = Utils.inputPassword(false);
+//    byte[] passwd = StringUtils.char2Byte(password);
+//    StringUtils.clear(password);
+//    wallet.checkPassword(passwd);
+//    StringUtils.clear(passwd);
+//
+//    if (wallet == null) {
+//      System.out.println("Warning: Login failed, Please registerWallet or importWallet first !!");
+//      return false;
+//    }
+//    wallet.setLogin();
+//    return true;
+//  }
+//
+//  public void logout() {
+//    if (wallet != null) {
+//      wallet.logout();
+//      wallet = null;
+//    }
+//    //Neddn't logout
+//  }
 
 
 
@@ -140,16 +135,8 @@ public class WalletApiWrapper {
     return privateKey;
   }
 
-  public String getAddress() {
-    return WalletApi.encode58Check(wallet.getAddress());
-  }
-
   public Account queryAccount(byte[] address) {
     return WalletApi.queryAccount(address);
-  }
-
-  public Account queryAccount() {
-    return wallet.queryAccount();
   }
 
   public boolean transferAsset(byte[] ownerAddress, byte[] fromPrivateKey, byte[] toAddress, String assertId, long amount)
@@ -167,10 +154,6 @@ public class WalletApiWrapper {
   public boolean assetIssue(byte[] ownerAddress, byte[] ownerPriKey, String name, long totalSupply)
           throws CipherException, IOException, CancelException {
     Contract.AssetIssueContract.Builder builder = Contract.AssetIssueContract.newBuilder();
-    if (ownerAddress == null) {
-      ownerAddress = wallet.getAddress();
-      System.out.println("ownerAddress: " + WalletApi.encode58Check(ownerAddress));
-    }
     builder.setOwnerAddress(ByteString.copyFrom(ownerAddress));
     builder.setName(ByteString.copyFrom(name.getBytes()));
 
@@ -187,9 +170,9 @@ public class WalletApiWrapper {
     return wallet.createAccount(owner, ownerPrivateKey, address, identity);
   }
 
-  public String createBusiness(byte[] address,String identity)
-          throws IOException, CipherException, CancelException {
-    return wallet.createBusiness(address,identity);
+  public boolean createBusiness(byte[] address,byte[] privateKey,String identity)
+          throws CancelException {
+    return wallet.createBusiness(address,privateKey,identity);
   }
 
   public AddressPrKeyPairMessage generateAddress() {
@@ -436,15 +419,4 @@ public class WalletApiWrapper {
     return wallet.triggerContract(owner, ownerPrivateKey, contractAddress,
             data,originEnergyLimit,energyPay,delegationPay,delegationPrivatekey);
   }
-
-  // TODO 在这里设置可信节点对用户发起的交易进行签名
-  public Transaction addTransactionSign(Transaction transaction)
-      throws IOException, CipherException, CancelException {
-    if (wallet == null || !wallet.isLoginState()) {
-      System.out.println("Warning: addTransactionSign failed,  Please login first !!");
-      return null;
-    }
-    return wallet.addTransactionSign(transaction);
-  }
-
 }

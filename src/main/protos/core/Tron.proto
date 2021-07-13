@@ -13,8 +13,6 @@ option go_package = "github.com/tronprotocol/grpc-gateway/core";
 message PersonalInfo {
   //hash(identity_info)
   string identity = 1;
-  //appID
-  string appID = 2;
 }
 
 enum AccountType {

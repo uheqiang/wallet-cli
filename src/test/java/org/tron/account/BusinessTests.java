@@ -3,6 +3,7 @@ package org.tron.account;
 import org.junit.Before;
 import org.junit.Test;
 import org.tron.common.entity.AccountInfo;
+import org.tron.common.utils.ByteArray;
 import org.tron.common.utils.JsonFormat;
 import org.tron.common.utils.JsonFormatUtil;
 import org.tron.core.exception.CancelException;
@@ -26,26 +27,27 @@ public class BusinessTests {
     @Before
     public void login() {
         try {
-            walletClient.login();
+            walletClient.init();
         } catch (IOException | CipherException e) {
             e.printStackTrace();
         }
     }
 
     @Test
-    public void createAccountBusiness() throws IOException, CipherException, CancelException {
-        String ownerAddressStr = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
-        //String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
+    public void createAccountBusiness() throws CancelException {
+        String ownerAddressStr = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
+        String privateKeyStr = "3b8aaabf34ed7de6ab95fd5e48f8c507a031de381e743935cf3a297312cecc08";
         byte[] ownerAddress = WalletApi.decodeFromBase58Check(ownerAddressStr);
+        byte[] privateKey = ByteArray.fromHexString(privateKeyStr);
         String identity = "This is my identity";
-        String result = walletClient.createBusiness(ownerAddress, identity);
-        System.out.println("business id: " + result);
+        boolean result = walletClient.createBusiness(ownerAddress, privateKey, identity);
+        System.out.println("business: " + result);
     }
 
     @Test
     public void queryAccountBusiness() throws TronException {
-        String ownerAddressStr = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
-        //String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
+        String ownerAddressStr = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
+        //String privateKeyStr = "3b8aaabf34ed7de6ab95fd5e48f8c507a031de381e743935cf3a297312cecc08";
         byte[] ownerAddress = WalletApi.decodeFromBase58Check(ownerAddressStr);
         Protocol.Account account = WalletApi.queryAccount(ownerAddress);
         System.out.println(JsonFormatUtil.formatJson(JsonFormat.printToString(account, true)));

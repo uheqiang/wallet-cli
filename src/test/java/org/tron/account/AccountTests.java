@@ -1,5 +1,6 @@
 package org.tron.account;
 
+import lombok.ToString;
 import org.junit.Before;
 import org.junit.Test;
 import org.tron.common.crypto.ECKey;
@@ -29,11 +30,37 @@ public class AccountTests {
     @Before
     public void login() {
         try {
-            walletClient.login();
+            walletClient.init();
         } catch (IOException | CipherException e) {
             e.printStackTrace();
         }
     }
+
+    @Test
+    public void registerWallet() {
+        String pwd = "123456";
+        try {
+            String name = walletClient.registerWallet(pwd);
+            System.out.println(name);
+        } catch (CipherException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @Test
+    public void importWallet() {
+        String pwd = "123456";
+        String userPrivateStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
+        byte[] userPrivateKey = ByteArray.fromHexString(userPrivateStr);
+        try {
+            String name = walletClient.importWallet(pwd, userPrivateKey);
+            System.out.println(name);
+        } catch (CipherException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @Test
     public void createAccount() {
@@ -48,18 +75,18 @@ public class AccountTests {
 
     @Test
     public void createAccountPersonal() {
-        String userAddressStr = "TMXnRunmpzLgdP4sG3mYMkZZ8Q6f9DV847";
-        String userPrivateStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
+        String userAddressStr = "TTtQ5cFAN9cxytfcRuW6bGu7dGSJbAp45H";
+        String userPrivateStr = "9e8b37d64fc121331674406ec2ac856cb8db3acf33eb47f1ed2fd6b53fa5d460";
         //byte[] userPrivateKey = ByteArray.fromHexString(userPrivateStr);
 
-        String businessAddressStr = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
-        String businessPrivateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
-        byte[] ownerPrivateKey = ByteArray.fromHexString(businessPrivateKeyStr);
+        String businessAddressStr = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
+        String businessPrivateKeyStr = "3b8aaabf34ed7de6ab95fd5e48f8c507a031de381e743935cf3a297312cecc08";
+        byte[] businessPrivateKey = ByteArray.fromHexString(businessPrivateKeyStr);
         String identity = "This is my identity";
         boolean result = false;
         try {
             result = walletClient.createAccount(WalletApi.decodeFromBase58Check(businessAddressStr),
-                    ownerPrivateKey,
+                    businessPrivateKey,
                     WalletApi.decodeFromBase58Check(userAddressStr),
                     identity);
         } catch (CipherException | IOException | CancelException e) {
@@ -78,13 +105,13 @@ public class AccountTests {
      */
     @Test
     public void queryAccountPersonal(){
-        String address = "TMXnRunmpzLgdP4sG3mYMkZZ8Q6f9DV847";
+        String address = "TTtQ5cFAN9cxytfcRuW6bGu7dGSJbAp45H";
         byte[] addr = WalletApi.decodeFromBase58Check(address);
         Protocol.Account account = WalletApi.queryAccount(addr);
         System.out.println(JsonFormatUtil.formatJson(JsonFormat.printToString(account, true)));
 
         try {
-            AccountInfo account1 = new WalletClient().getAccount(address);
+            AccountInfo account1 = walletClient.getAccount(address);
             System.out.println(account1.toString());
         } catch (TronException e) {
             e.printStackTrace();
