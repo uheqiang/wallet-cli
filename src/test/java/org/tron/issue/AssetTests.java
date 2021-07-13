@@ -27,7 +27,7 @@ public class AssetTests {
     @Before
     public void login() {
         try {
-            walletClient.login();
+            walletClient.init();
         } catch (IOException | CipherException e) {
             e.printStackTrace();
         }
@@ -36,19 +36,13 @@ public class AssetTests {
     //发布资产
     @Test
     public void createIssue(){
-        /*ECKey ecKey1 = new ECKey(Utils.getRandom());
-        byte[] ownerAddress = ecKey1.getAddress();
-        String addressStr = WalletApi.encode58Check(ownerAddress);
-        System.out.println(addressStr);
-        String privateKey = ByteArray.toHexString(ecKey1.getPrivKeyBytes());
-        System.out.println(privateKey);*/
-        String ownerAddressStr = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
+        String ownerAddressStr = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
         byte[] ownerAddress = WalletApi.decodeFromBase58Check(ownerAddressStr);
-        String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
+        String privateKeyStr = "3b8aaabf34ed7de6ab95fd5e48f8c507a031de381e743935cf3a297312cecc08";
         byte[] privateKey = ByteArray.fromHexString(privateKeyStr);
         boolean result = false;
         try {
-            result = walletClient.assetIssue(/*ownerAddress*/ownerAddress, privateKey,"NFTCoin", /*"nft",*/ 1000);
+            result = walletClient.assetIssue(ownerAddress, privateKey,"NFTCoin", 1000);
         } catch (CipherException | IOException | CancelException e) {
             e.printStackTrace();
         }
@@ -61,7 +55,7 @@ public class AssetTests {
 
     @Test
     public void queryIssue() {
-        String ownerAddressStr = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
+        String ownerAddressStr = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
         byte[] address = WalletApi.decodeFromBase58Check(ownerAddressStr);
         Protocol.Account owner = WalletApi.queryAccount(address);
         Contract.AssetIssueContract nftCoin = walletClient.getAssetIssueById(owner.getAssetIssuedID().toStringUtf8());
@@ -73,12 +67,14 @@ public class AssetTests {
     //增发资产
     @Test
     public void updateAsset() {
-        String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
+        String address = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
         byte[] addr = WalletApi.decodeFromBase58Check(address);
+        String privateKeyStr = "3b8aaabf34ed7de6ab95fd5e48f8c507a031de381e743935cf3a297312cecc08";
+        byte[] privateKey = ByteArray.fromHexString(privateKeyStr);
         String assetId = "1000001";
         boolean result = false;
         try {
-            result = walletClient.updateAsset(addr, assetId, 99999999L);
+            result = walletClient.updateAsset(addr, privateKey, assetId, 99999999L);
         } catch (CipherException | IOException | CancelException e) {
             e.printStackTrace();
         }
@@ -93,8 +89,8 @@ public class AssetTests {
     @Test
     public void queryBalance() {
         String address = "";
-        address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
-        address = "TMXnRunmpzLgdP4sG3mYMkZZ8Q6f9DV847";
+        address = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
+        address = "TTtQ5cFAN9cxytfcRuW6bGu7dGSJbAp45H";
         byte[] addr = WalletApi.decodeFromBase58Check(address);
         Protocol.Account account = WalletApi.queryAccount(addr);
         System.out.println(JsonFormatUtil.formatJson(JsonFormat.printToString(account, true)));
@@ -114,12 +110,13 @@ public class AssetTests {
     //资产转移
     @Test
     public void transferIssue() {
-        String owner = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
-        String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
+        String owner = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
+        String privateKeyStr = "3b8aaabf34ed7de6ab95fd5e48f8c507a031de381e743935cf3a297312cecc08";
         byte[] privateKey = ByteArray.fromHexString(privateKeyStr);
-        String to = "TMXnRunmpzLgdP4sG3mYMkZZ8Q6f9DV847";
+        String to = "TTtQ5cFAN9cxytfcRuW6bGu7dGSJbAp45H";
+        //String privateKey = "9e8b37d64fc121331674406ec2ac856cb8db3acf33eb47f1ed2fd6b53fa5d460";
         String assertId = "1000001";
-        long num = 13;
+        long num = 997;
         boolean result = false;
         try {
             result = walletClient.assetTransfer(WalletApi.decodeFromBase58Check(owner),privateKey,
@@ -137,14 +134,14 @@ public class AssetTests {
     //兑换能量(交易手续费)
     @Test
     public void exchangeFree() {
-        //byte[] ownerAddress, long frozen_balance, int resourceCode, byte[] receiverAddress
-        String owner = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
+        String owner = "TTtQ5cFAN9cxytfcRuW6bGu7dGSJbAp45H";
         byte[] ownerAddress = WalletApi.decodeFromBase58Check(owner);
-        String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
+        String privateKeyStr = "9e8b37d64fc121331674406ec2ac856cb8db3acf33eb47f1ed2fd6b53fa5d460";
         byte[] privateKey = ByteArray.fromHexString(privateKeyStr);
         boolean result = false;
         try {
-            result = walletClient.freezeBalanceForMyself(ownerAddress, privateKey,999999);
+            long num = 97;
+            result = walletClient.freezeBalanceForMyself(ownerAddress, privateKey, num);
         } catch (CipherException | IOException | CancelException e) {
             e.printStackTrace();
         }
