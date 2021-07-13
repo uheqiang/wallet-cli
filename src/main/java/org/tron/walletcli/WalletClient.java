@@ -122,12 +122,13 @@ public class WalletClient {
     /**
      * 增发TRC10
      * @param ownerAddress 增发地址，只有发布者才能增发
+     * @param privateKey 发布者私钥
      * @param assetId id
      * @param mintTokens 增发数量
      */
-    public boolean updateAsset(byte[] ownerAddress, String assetId, long mintTokens)
+    public boolean updateAsset(byte[] ownerAddress, byte[] privateKey, String assetId, long mintTokens)
             throws IOException, CipherException, CancelException {
-        return walletApiWrapper.updateAsset(ownerAddress,assetId,mintTokens);
+        return walletApiWrapper.updateAsset(ownerAddress,privateKey,assetId,mintTokens);
     }
 
     /**

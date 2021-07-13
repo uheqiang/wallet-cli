@@ -179,14 +179,14 @@ public class WalletApiWrapper {
     return WalletApi.generateAddress();
   }
 
-  public boolean createWitness(byte[] ownerAddress, String url)
+  public boolean createWitness(byte[] ownerAddress,byte[] privateKey, String url)
       throws CipherException, IOException, CancelException {
-    return wallet.createWitness(ownerAddress, url.getBytes());
+    return wallet.createWitness(ownerAddress, privateKey,url.getBytes());
   }
 
-  public boolean updateWitness(byte[] ownerAddress, String url)
+  public boolean updateWitness(byte[] ownerAddress,byte[] privateKey, String url)
       throws CipherException, IOException, CancelException {
-    return wallet.updateWitness(ownerAddress, url.getBytes());
+    return wallet.updateWitness(ownerAddress, privateKey,url.getBytes());
   }
 
   public Block getBlock(long blockNum) {
@@ -201,9 +201,9 @@ public class WalletApiWrapper {
     return WalletApi.getBlock2(blockNum);
   }
 
-  public boolean voteWitness(byte[] ownerAddress, HashMap<String, String> witness)
+  public boolean voteWitness(byte[] ownerAddress, byte[] password, HashMap<String, String> witness)
       throws CipherException, IOException, CancelException {
-    return wallet.voteWitness(ownerAddress, witness);
+    return wallet.voteWitness(ownerAddress, password,witness);
   }
 
   public Optional<WitnessList> listWitnesses() {
@@ -276,14 +276,9 @@ public class WalletApiWrapper {
     return WalletApi.getNextMaintenanceTime();
   }
 
-  public boolean updateAccount(byte[] ownerAddress, byte[] accountNameBytes)
-      throws CipherException, IOException, CancelException {
-    return wallet.updateAccount(ownerAddress, accountNameBytes);
-  }
-
-  public boolean updateAsset(byte[] ownerAddress, String assetId, long mintTokens)
+  public boolean updateAsset(byte[] ownerAddress, byte[] privateKey, String assetId, long mintTokens)
           throws CipherException, IOException, CancelException {
-    return wallet.updateAsset(ownerAddress,assetId, mintTokens);
+    return wallet.updateAsset(ownerAddress,privateKey,assetId, mintTokens);
   }
 
   /**
@@ -306,20 +301,9 @@ public class WalletApiWrapper {
             receiverAddress);
   }
 
-  public boolean unfreezeBalance(byte[] ownerAddress, int resourceCode, byte[] receiverAddress)
+  public boolean createProposal(byte[] ownerAddress,byte[] privateKey, HashMap<Long, Long> parametersMap)
       throws CipherException, IOException, CancelException {
-    return wallet.unfreezeBalance(ownerAddress, resourceCode, receiverAddress);
-  }
-
-
-  public boolean unfreezeAsset(byte[] ownerAddress)
-      throws CipherException, IOException, CancelException {
-    return wallet.unfreezeAsset(ownerAddress);
-  }
-
-  public boolean createProposal(byte[] ownerAddress, HashMap<Long, Long> parametersMap)
-      throws CipherException, IOException, CancelException {
-    return wallet.createProposal(ownerAddress, parametersMap);
+    return wallet.createProposal(ownerAddress,privateKey, parametersMap);
   }
 
 
@@ -351,48 +335,37 @@ public class WalletApiWrapper {
   }
 
 
-  public boolean approveProposal(byte[] ownerAddress, long id, boolean is_add_approval)
+  public boolean approveProposal(byte[] ownerAddress,byte[] privateKey, long id, boolean is_add_approval)
       throws CipherException, IOException, CancelException {
-    return wallet.approveProposal(ownerAddress, id, is_add_approval);
+    return wallet.approveProposal(ownerAddress, privateKey,id, is_add_approval);
   }
 
-  public boolean deleteProposal(byte[] ownerAddress, long id)
+  public boolean deleteProposal(byte[] ownerAddress,byte[] privateKey, long id)
       throws CipherException, IOException, CancelException {
-    return wallet.deleteProposal(ownerAddress, id);
+    return wallet.deleteProposal(ownerAddress,privateKey, id);
   }
 
-  public boolean exchangeCreate(byte[] ownerAddress, byte[] firstTokenId, long firstTokenBalance,
+  public boolean exchangeCreate(byte[] ownerAddress, byte[] privateKey, byte[] firstTokenId, long firstTokenBalance,
       byte[] secondTokenId, long secondTokenBalance)
-      throws CipherException, IOException, CancelException {
-    return wallet.exchangeCreate(ownerAddress, firstTokenId, firstTokenBalance,
+      throws CancelException {
+    return wallet.exchangeCreate(ownerAddress, privateKey,firstTokenId, firstTokenBalance,
         secondTokenId, secondTokenBalance);
   }
 
-  public boolean exchangeInject(byte[] ownerAddress, long exchangeId, byte[] tokenId, long quant)
+  public boolean exchangeInject(byte[] ownerAddress, byte[] privateKey,long exchangeId, byte[] tokenId, long quant)
       throws CipherException, IOException, CancelException {
-    return wallet.exchangeInject(ownerAddress, exchangeId, tokenId, quant);
+    return wallet.exchangeInject(ownerAddress, privateKey,exchangeId, tokenId, quant);
   }
 
-  public boolean exchangeWithdraw(byte[] ownerAddress, long exchangeId, byte[] tokenId, long quant)
-      throws CipherException, IOException, CancelException {
-    return wallet.exchangeWithdraw(ownerAddress, exchangeId, tokenId, quant);
+  public boolean exchangeTransaction(byte[] ownerAddress, byte[] ownerPrivatekey,long exchangeId, byte[] tokenId,
+      long quant, long expected) throws CancelException {
+    return wallet.exchangeTransaction(ownerAddress, ownerPrivatekey,exchangeId, tokenId, quant, expected);
   }
 
-  public boolean exchangeTransaction(byte[] ownerAddress, long exchangeId, byte[] tokenId,
-      long quant, long expected) throws CipherException, IOException, CancelException {
-    return wallet.exchangeTransaction(ownerAddress, exchangeId, tokenId, quant, expected);
-  }
-
-  public boolean updateSetting(byte[] ownerAddress, byte[] contractAddress,
-      long consumeUserResourcePercent) throws CipherException, IOException, CancelException {
-    return wallet.updateSetting(ownerAddress, contractAddress, consumeUserResourcePercent);
-
-  }
-
-  public boolean updateEnergyLimit(byte[] ownerAddress, byte[] contractAddress,
-      long originEnergyLimit) throws CipherException, IOException, CancelException {
-    return wallet.updateEnergyLimit(ownerAddress, contractAddress, originEnergyLimit);
-  }
+//  public boolean updateEnergyLimit(byte[] ownerAddress, byte[] contractAddress,
+//      long originEnergyLimit) throws CipherException, IOException, CancelException {
+//    return wallet.updateEnergyLimit(ownerAddress, contractAddress, originEnergyLimit);
+//  }
 
   public String deployContract(byte[] ownerAddress, byte[] ownerPrivatekey, String name,
                                String abiStr, String codeStr, long feeLimit, long value,
