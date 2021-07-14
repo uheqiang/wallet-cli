@@ -75,8 +75,8 @@ public class AccountTests {
 
     @Test
     public void createAccountPersonal() {
-        String userAddressStr = "TTtQ5cFAN9cxytfcRuW6bGu7dGSJbAp45H";
-        String userPrivateStr = "9e8b37d64fc121331674406ec2ac856cb8db3acf33eb47f1ed2fd6b53fa5d460";
+        String userAddressStr = "TPdRzuhbVUBbyMAa7XEhvhejyZA2grxprd";
+        String userPrivateStr = "2a9e6f9b10248fd5181131d7c8a7580a5999d0fe91b2aa2c7ceeb9b815c050ab";
         //byte[] userPrivateKey = ByteArray.fromHexString(userPrivateStr);
 
         String businessAddressStr = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
@@ -105,7 +105,7 @@ public class AccountTests {
      */
     @Test
     public void queryAccountPersonal(){
-        String address = "TTtQ5cFAN9cxytfcRuW6bGu7dGSJbAp45H";
+        String address = "TPdRzuhbVUBbyMAa7XEhvhejyZA2grxprd";
         byte[] addr = WalletApi.decodeFromBase58Check(address);
         Protocol.Account account = WalletApi.queryAccount(addr);
         System.out.println(JsonFormatUtil.formatJson(JsonFormat.printToString(account, true)));

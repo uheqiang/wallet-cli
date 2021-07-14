@@ -47,7 +47,7 @@ public class WalletApi {
   private boolean loginState = false;
   private static byte addressPreFixByte;
   private static int rpcVersion = 2;
-  private static boolean isEckey = false;
+  private static boolean isEckey = true;
   private byte[] address;
 
   // 内置的ERC721协议的智能合约
@@ -353,6 +353,25 @@ public class WalletApi {
     }
   }
 
+  private boolean processTransactionExtention(TransactionExtention transactionExtention) {
+    if (transactionExtention == null) {
+      return false;
+    }
+    Return ret = transactionExtention.getResult();
+    if (!ret.getResult()) {
+      return false;
+    }
+    Transaction transaction = transactionExtention.getTransaction();
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
+      return false;
+    }
+
+    if (transaction.getRawData().getContract(0).getType() == ContractType.ShieldedTransferContract) {
+      return false;
+    }
+    return true;
+  }
+
   private boolean processTransactionExtention(TransactionExtention transactionExtention, byte[] privateKey)
           throws CancelException {
     if (transactionExtention == null) {
@@ -375,7 +394,24 @@ public class WalletApi {
     }
 
     transaction = signTransaction(transaction, privateKey);
+
     return rpcCli.broadcastTransaction(transaction);
+  }
+
+  private void showTransactionAfterSign(Transaction transaction)
+          throws InvalidProtocolBufferException {
+    System.out.println("after sign transaction hex string is " +
+            ByteArray.toHexString(transaction.toByteArray()));
+    System.out.println("txid is " +
+            ByteArray.toHexString(Sha256Sm3Hash.hash(transaction.getRawData().toByteArray())));
+
+    if (transaction.getRawData().getContract(0).getType() == ContractType.CreateSmartContract) {
+      CreateSmartContract createSmartContract = transaction.getRawData().getContract(0)
+              .getParameter().unpack(CreateSmartContract.class);
+      byte[] contractAddress = generateContractAddress(
+              createSmartContract.getOwnerAddress().toByteArray(), transaction);
+      System.out.println("Your smart contract address will be: " + WalletApi.encode58Check(contractAddress));
+    }
   }
 
   private boolean processTransaction(Transaction transaction)
@@ -1289,11 +1325,10 @@ public class WalletApi {
 
   public static CreateSmartContract createContractDeployContract(
       String contractName,
-      byte[] address,
+      byte[] owner,
       String ABI,
       String code,
       long value,
-      long consumeUserResourcePercent,
       long energyPay,
       DelegationPay delegationPay,
       byte[] delegationPaySignature,
@@ -1312,9 +1347,8 @@ public class WalletApi {
 
     SmartContract.Builder builder = SmartContract.newBuilder();
     builder.setName(contractName);
-    builder.setOriginAddress(ByteString.copyFrom(address));
+    builder.setOriginAddress(ByteString.copyFrom(owner));
     builder.setAbi(abi);
-//    builder.setConsumeUserResourcePercent(consumeUserResourcePercent);
     builder.setOriginEnergyLimit(originEnergyLimit);
 
     if (value != 0) {
@@ -1330,11 +1364,11 @@ public class WalletApi {
     builder.setBytecode(ByteString.copyFrom(byteCode));
     CreateSmartContract.Builder createSmartContractBuilder = CreateSmartContract.newBuilder();
     createSmartContractBuilder
-        .setOwnerAddress(ByteString.copyFrom(address))
+        .setOwnerAddress(ByteString.copyFrom(owner))
         .setNewContract(builder.build())
         .setCallEnergyValue(energyPay);
 
-    if (delegationPay != null && ArrayUtils.isEmpty(delegationPaySignature)) {
+    if (delegationPay != null && ArrayUtils.isNotEmpty(delegationPaySignature)) {
       createSmartContractBuilder
               .setDelegationPay(delegationPay)
               .setDelegationPaySignature(ByteString.copyFrom(delegationPaySignature));
@@ -1457,7 +1491,6 @@ public class WalletApi {
       String code,
       long feeLimit,
       long value,
-      long consumeUserResourcePercent,
       long energyPay,
       DelegationPay delegationPay,
       byte[] delegationPrivateKey,
@@ -1476,7 +1509,6 @@ public class WalletApi {
               ABI,
               code,
               value,
-              consumeUserResourcePercent,
               energyPay,
               delegationPay,
               delegationPaySignature,
@@ -1498,8 +1530,7 @@ public class WalletApi {
 
     TransactionExtention.Builder texBuilder = TransactionExtention.newBuilder();
     Transaction.Builder transBuilder = Transaction.newBuilder();
-    Transaction.raw.Builder rawBuilder =
-        transactionExtention.getTransaction().getRawData().toBuilder();
+    Transaction.raw.Builder rawBuilder = transactionExtention.getTransaction().getRawData().toBuilder();
     rawBuilder.setFeeLimit(feeLimit);
     transBuilder.setRawData(rawBuilder);
     for (int i = 0; i < transactionExtention.getTransaction().getSignatureCount(); i++) {
@@ -1515,14 +1546,18 @@ public class WalletApi {
     texBuilder.setTxid(transactionExtention.getTxid());
     transactionExtention = texBuilder.build();
 
-    boolean result = processTransactionExtention(transactionExtention, ownerPrivateKey);
-    if (result) {
-      byte[] contractAddress = generateContractAddress(owner,transactionExtention.getTransaction());
-      System.out.println("Your smart contract address will be: " + WalletApi.encode58Check(contractAddress));
-      return  WalletApi.encode58Check(contractAddress);
-    } else {
-      return null;
+    boolean result = processTransactionExtention(transactionExtention);
+    if (!result) {
+      throw new CancelException("Deploy contract cancel, process transaction result is false");
     }
+    Transaction transactionSigned = signTransaction(transactionExtention.getTransaction(), ownerPrivateKey);
+    boolean broadcastResult = rpcCli.broadcastTransaction(transactionSigned);
+    if (!broadcastResult) {
+      throw new CancelException("Deploy contract cancel, broadcast transaction fail");
+    }
+    byte[] contractAddress = generateContractAddress(owner,transactionSigned);
+    //System.out.println("Your smart contract address will be: " + WalletApi.encode58Check(contractAddress));
+    return WalletApi.encode58Check(contractAddress);
   }
 
   public byte[] triggerConstantContract(byte[] owner, byte[] contractAddress, byte[] data) {

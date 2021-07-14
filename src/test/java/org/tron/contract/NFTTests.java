@@ -22,31 +22,45 @@ public class NFTTests {
     @Before
     public void login() {
         try {
-            walletClient.login();
+            walletClient.init();
         } catch (IOException | CipherException e) {
             e.printStackTrace();
         }
     }
 
+    private String owner = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
+    private String ownerPrivateKey = "3b8aaabf34ed7de6ab95fd5e48f8c507a031de381e743935cf3a297312cecc08";
+
+    private String contract = "TEcMUNS2Cz5Kp1yhdPhk11j8k2vC8sUxxj";
+
     @Test
     public void deployContract(){
-        String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
-        //byte[] addr = WalletApi.decodeFromBase58Check(address);
-        String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
-        String name = "NFT_CONTRACT";
+        String address = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
+        byte[] addr = WalletApi.decodeFromBase58Check(owner);
+        String privateKeyStr = "3b8aaabf34ed7de6ab95fd5e48f8c507a031de381e743935cf3a297312cecc08";
+        byte[] privateKey = ByteArray.fromHexString(ownerPrivateKey);
 
-        boolean result = false;
         try {
             long energyPay = 10;
-            walletClient.deployContract(address,privateKeyStr,name,energyPay);
+            String name = "NFT_CONTRACT";
+            String contractAddress = walletClient.deployContract(owner,ownerPrivateKey,name,energyPay);
+            System.out.println("contract address: " + contractAddress);
         } catch (CancelException e) {
             e.printStackTrace();
         }
-        if (result) {
-            System.out.println("Create contract successful !!");
-        } else {
-            System.out.println("Create contract failed !!");
-        }
+    }
+
+    @Test
+    public void callConstantContract() {
+        //String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
+        //0.6.8
+        String contract = "TWGKYukW2H1eRZAsYLAqEdxMdhJ3Je9hAt";
+        String method = "name()";
+        method = "symbol()";
+        String args = "";
+        byte[] bytes = walletClient.callConstantContract(contract, owner, method, args);
+        System.out.println("nft name: " + ByteArray.toStr(bytes).trim());
+
     }
 
     @Test
@@ -56,49 +70,44 @@ public class NFTTests {
         String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
         String name = "NFT_CONTRACT";
 
-        String sponsorBase58 = "TSNZ43xVfLoJ3RGxfE52xkFfENokwkgEXY";
-        String sponsorPrivateKey = "bb3a4643f77cdc584a511cc039d58955f66e341b9d79d43668515c1a5ce979a5";
+        String sponsorBase58 = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
+        String sponsorPrivateKey = "3b8aaabf34ed7de6ab95fd5e48f8c507a031de381e743935cf3a297312cecc08";
         long limitPerTransaction = 10;
 
-        boolean result = false;
         try {
             long energyPay = 10;
-            walletClient.deployContract(address,
-                    privateKeyStr,
+            String contractAddress = walletClient.deployContract(owner,
+                    ownerPrivateKey,
                     name,
                     energyPay,
                     sponsorBase58,
                     sponsorPrivateKey,
                     limitPerTransaction);
+            System.out.println("contract address: " + contractAddress);
         } catch (CancelException e) {
             e.printStackTrace();
-        }
-        if (result) {
-            System.out.println("Create contract successful !!");
-        } else {
-            System.out.println("Create contract failed !!");
         }
     }
 
     @Test
     public void mintNft(){
-        String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
-        byte[] contractOwner = WalletApi.decodeFromBase58Check(address);
-        String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
-        byte[] ownerPrivateKey = ByteArray.fromHexString(privateKeyStr);
+        //String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
+        byte[] contractOwner = WalletApi.decodeFromBase58Check(owner);
+        //String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
+        byte[] ownerKey = ByteArray.fromHexString(ownerPrivateKey);
         //0.6.8
-        String contract = "TLWYaGcWj7bg6CTpQ4dYwjENdKAVq2DqvJ";
+        //String contract = "TEcMUNS2Cz5Kp1yhdPhk11j8k2vC8sUxxj";
         byte[] contractAddress = WalletApi.decodeFromBase58Check(contract);
-        long tokenId = 0;
-        String metaData = "This is meta data of the first token!";
+        long tokenId = 3;
+        String metaData = "This is meta data of the third token!";
         long energyPay = 10;
 
         boolean result = false;
         try {
-            result = walletClient.mintNft(contractOwner,
+            result = walletClient.mintNft(owner,
                     ownerPrivateKey,
-                    contractAddress,
-                    contractOwner,
+                    contract,
+                    owner,
                     tokenId,
                     metaData,
                     energyPay);
@@ -115,60 +124,57 @@ public class NFTTests {
     @Test
     public void mintNftProxyPay(){
         String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
-        byte[] contractOwner = WalletApi.decodeFromBase58Check(address);
+        byte[] contractOwner = WalletApi.decodeFromBase58Check(owner);
         String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
-        byte[] ownerPrivateKey = ByteArray.fromHexString(privateKeyStr);
+        byte[] ownerKey = ByteArray.fromHexString(ownerPrivateKey);
         //0.6.8
-        String contract = "TLWYaGcWj7bg6CTpQ4dYwjENdKAVq2DqvJ";
+        //String contract = "TEcMUNS2Cz5Kp1yhdPhk11j8k2vC8sUxxj";
         byte[] contractAddress = WalletApi.decodeFromBase58Check(contract);
         long tokenId = 0L;
         String metaData = "This is meta data of the first token!";
         long energyPay = 10L;
 
         String sponsorBase58 = "TSNZ43xVfLoJ3RGxfE52xkFfENokwkgEXY";
-        byte[] sponsorAddress = WalletApi.decodeFromBase58Check(sponsorBase58);
         String sponsorPrivateKey = "bb3a4643f77cdc584a511cc039d58955f66e341b9d79d43668515c1a5ce979a5";
-        byte[] sponsorPrivateKeys = ByteArray.fromHexString(sponsorPrivateKey);
         long limitPerTransaction = 10L;
 
         boolean result = false;
         try {
-            result = walletClient.mintNft(contractOwner,
+            String to = owner;
+            result = walletClient.mintNft(owner,
                     ownerPrivateKey,
-                    contractAddress,
-                    contractOwner,
+                    contract,
+                    to,
                     tokenId,
                     metaData,
                     energyPay,
-                    sponsorAddress,
-                    sponsorPrivateKeys,
+                    sponsorBase58,
+                    sponsorPrivateKey,
                     limitPerTransaction);
         } catch (CancelException e) {
             e.printStackTrace();
         }
         if (result) {
-            System.out.println("Create contract successful !!");
+            System.out.println("Mint nft successful !!");
         } else {
-            System.out.println("Create contract failed !!");
+            System.out.println("Mint nft failed !!");
         }
     }
 
     @Test
     public void balanceOfAndTokenInfo(){
-        String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
-        address = "TMXnRunmpzLgdP4sG3mYMkZZ8Q6f9DV847";
-        byte[] addr = WalletApi.decodeFromBase58Check(address);
+        String address = owner;
+        address = "TTtQ5cFAN9cxytfcRuW6bGu7dGSJbAp45H";
         //0.6.8
-        String contract = "TLWYaGcWj7bg6CTpQ4dYwjENdKAVq2DqvJ";
-        byte[] contractAddr = WalletApi.decodeFromBase58Check(contract);
+        //String contract = "TEcMUNS2Cz5Kp1yhdPhk11j8k2vC8sUxxj";
 
-        long balance = walletClient.balanceFromContract(contractAddr,addr);
+        long balance = walletClient.balanceFromContract(contract,address);
         System.out.println("balance = " + balance);
 
         for (long index = 0; index < balance; index++) {
-            long tokenId = walletClient.tokenByIndexFromContract(contractAddr, addr, index);
+            long tokenId = walletClient.tokenByIndexFromContract(contract, address, index);
             System.out.println("token id: " + tokenId);
-            String tokenMetaData = walletClient.tokenUriFromContract(contractAddr, addr, tokenId);
+            String tokenMetaData = walletClient.tokenMateDataFromContract(contract, address, tokenId);
             System.out.println("token meta data: " + tokenMetaData);
         }
     }
@@ -176,23 +182,22 @@ public class NFTTests {
     @Test
     public void transferNft(){
         String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
-        byte[] addr = WalletApi.decodeFromBase58Check(address);
+        byte[] addr = WalletApi.decodeFromBase58Check(owner);
         String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
-        byte[] ownerPrivateKey = ByteArray.fromHexString(privateKeyStr);
+        byte[] ownerKey = ByteArray.fromHexString(ownerPrivateKey);
         //0.6.8
-        String contract = "TLWYaGcWj7bg6CTpQ4dYwjENdKAVq2DqvJ";
+        //String contract = "TEcMUNS2Cz5Kp1yhdPhk11j8k2vC8sUxxj";
         byte[] contractAddr = WalletApi.decodeFromBase58Check(contract);
         long tokenId = 0L;
         long energyPay = 10L;
-        String to = "TMXnRunmpzLgdP4sG3mYMkZZ8Q6f9DV847";
-        byte[] toBytes = WalletApi.decodeFromBase58Check(to);
+        String to = "TTtQ5cFAN9cxytfcRuW6bGu7dGSJbAp45H";
 
         boolean result = false;
         try {
-            result = walletClient.transferNft(addr,
+            result = walletClient.transferNft(owner,
                     ownerPrivateKey,
-                    contractAddr,
-                    toBytes,
+                    contract,
+                    to,
                     tokenId,
                     energyPay);
         } catch (CancelException e) {
@@ -213,7 +218,7 @@ public class NFTTests {
         String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
         byte[] ownerPrivateKey = ByteArray.fromHexString(privateKeyStr);
         //0.6.8
-        String contract = "TLWYaGcWj7bg6CTpQ4dYwjENdKAVq2DqvJ";
+        //String contract = "TEcMUNS2Cz5Kp1yhdPhk11j8k2vC8sUxxj";
         byte[] contractAddr = WalletApi.decodeFromBase58Check(contract);
         long tokenId = 0L;
         long energyPay = 10L;
@@ -221,21 +226,19 @@ public class NFTTests {
         byte[] toBytes = WalletApi.decodeFromBase58Check(to);
 
         String sponsorBase58 = "TSNZ43xVfLoJ3RGxfE52xkFfENokwkgEXY";
-        byte[] sponsorAddress = WalletApi.decodeFromBase58Check(sponsorBase58);
         String sponsorPrivateKey = "bb3a4643f77cdc584a511cc039d58955f66e341b9d79d43668515c1a5ce979a5";
-        byte[] sponsorPrivateKeys = ByteArray.fromHexString(sponsorPrivateKey);
         long limitPerTransaction = 10L;
 
         boolean result = false;
         try {
-            result = walletClient.transferNft(addr,
-                    ownerPrivateKey,
-                    contractAddr,
-                    toBytes,
+            result = walletClient.transferNft(owner,
+                    owner,
+                    contract,
+                    to,
                     tokenId,
                     energyPay,
-                    sponsorAddress,
-                    sponsorPrivateKeys,
+                    sponsorBase58,
+                    sponsorPrivateKey,
                     limitPerTransaction);
         } catch (CancelException e) {
             e.printStackTrace();
@@ -251,20 +254,17 @@ public class NFTTests {
     @Test
     public void setMetaData() {
         String metaData = "new meta info";
-        String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
-        byte[] addr = WalletApi.decodeFromBase58Check(address);
-        String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
-        byte[] ownerPrivateKey = ByteArray.fromHexString(privateKeyStr);
+        String address = "TTtQ5cFAN9cxytfcRuW6bGu7dGSJbAp45H";
+        String privateKeyStr = "9e8b37d64fc121331674406ec2ac856cb8db3acf33eb47f1ed2fd6b53fa5d460";
         //0.6.8
-        String contract = "TLWYaGcWj7bg6CTpQ4dYwjENdKAVq2DqvJ";
-        byte[] contractAddr = WalletApi.decodeFromBase58Check(contract);
+        //String contract = "TEcMUNS2Cz5Kp1yhdPhk11j8k2vC8sUxxj";
         long tokenId = 0L;
         long energyPay = 10L;
         boolean result = false;
         try {
-            result = walletClient.setTokenURI(addr,
+            result = walletClient.setTokenMetaData(owner,
                     ownerPrivateKey,
-                    contractAddr,
+                    contract,
                     tokenId,
                     metaData,
                     energyPay);
@@ -282,31 +282,26 @@ public class NFTTests {
     public void setMetaDataProxyPay() {
         String metaData = "new meta info";
         String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
-        byte[] addr = WalletApi.decodeFromBase58Check(address);
         String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
-        byte[] ownerPrivateKey = ByteArray.fromHexString(privateKeyStr);
         //0.6.8
-        String contract = "TLWYaGcWj7bg6CTpQ4dYwjENdKAVq2DqvJ";
-        byte[] contractAddr = WalletApi.decodeFromBase58Check(contract);
+        //String contract = "TEcMUNS2Cz5Kp1yhdPhk11j8k2vC8sUxxj";
         long tokenId = 0L;
         long energyPay = 10L;
 
         String sponsorBase58 = "TSNZ43xVfLoJ3RGxfE52xkFfENokwkgEXY";
-        byte[] sponsorAddress = WalletApi.decodeFromBase58Check(sponsorBase58);
         String sponsorPrivateKey = "bb3a4643f77cdc584a511cc039d58955f66e341b9d79d43668515c1a5ce979a5";
-        byte[] sponsorPrivateKeys = ByteArray.fromHexString(sponsorPrivateKey);
         long limitPerTransaction = 10L;
 
         boolean result = false;
         try {
-            result = walletClient.setTokenURI(addr,
+            result = walletClient.setTokenMetaData(owner,
                     ownerPrivateKey,
-                    contractAddr,
+                    contract,
                     tokenId,
                     metaData,
                     energyPay,
-                    sponsorAddress,
-                    sponsorPrivateKeys,
+                    sponsorBase58,
+                    sponsorPrivateKey,
                     limitPerTransaction);
         } catch (CancelException e) {
             e.printStackTrace();

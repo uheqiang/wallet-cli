@@ -1,9 +1,11 @@
 package org.tron.walletcli;
 
+import ch.qos.logback.core.pattern.color.BoldYellowCompositeConverter;
 import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
 import org.tron.api.GrpcAPI;
 import org.tron.api.GrpcAPI.*;
+import org.tron.common.utils.ByteArray;
 import org.tron.common.utils.Utils;
 import org.tron.core.exception.CancelException;
 import org.tron.core.exception.CipherException;
@@ -368,28 +370,34 @@ public class WalletApiWrapper {
 //  }
 
   public String deployContract(byte[] ownerAddress, byte[] ownerPrivatekey, String name,
-                               String abiStr, String codeStr, long feeLimit, long value,
-                               long consumeUserResourcePercent, long energyPay, Contract.DelegationPay delegationPay,
+                               String abiStr, String codeStr, long originEnergyLimit, long feeLimit, long value,
+                               long energyPay, Contract.DelegationPay delegationPay,
                                byte[] delegationPrivateKey,
                                long tokenValue, String tokenId, String libraryAddressPair,
                                String compilerVersion) throws CancelException {
-    long originEnergyLimit = 1000000L;
+
     return wallet.deployContract(ownerAddress, ownerPrivatekey, name, abiStr, codeStr, feeLimit, value,
-            consumeUserResourcePercent, energyPay, delegationPay, delegationPrivateKey, originEnergyLimit, tokenValue, tokenId,
+            energyPay, delegationPay, delegationPrivateKey, originEnergyLimit, tokenValue, tokenId,
             libraryAddressPair, compilerVersion);
   }
 
-  public byte[] triggerConstantContract(byte[] owner, byte[] contractAddress, byte[] data) {
-    return wallet.triggerConstantContract(owner,contractAddress,data);
+  public byte[] triggerConstantContract(String ownerBase58, String contractBase58, byte[] data) {
+      byte[] ownerAddress = WalletApi.decodeFromBase58Check(ownerBase58);
+      byte[] contractAddress = WalletApi.decodeFromBase58Check(contractBase58);
+    return wallet.triggerConstantContract(ownerAddress,contractAddress,data);
   }
 
-  public boolean triggerContract(byte[] owner, byte[] ownerPrivateKey,
-                                 byte[] contractAddress, byte[] data, long energyPay,
+  public boolean triggerContract(String ownerBase58, String ownerPrivateKey,
+                                 String contractBase58, byte[] data, long energyPay,
                                  Contract.DelegationPay delegationPay,
-                                 byte[] delegationPrivatekey)
+                                 String delegationPrivateKey)
           throws CancelException {
     long originEnergyLimit = 100000L;
-    return wallet.triggerContract(owner, ownerPrivateKey, contractAddress,
-            data,originEnergyLimit,energyPay,delegationPay,delegationPrivatekey);
+      byte[] ownerAddress = WalletApi.decodeFromBase58Check(ownerBase58);
+      byte[] ownerKey = ByteArray.fromHexString(ownerPrivateKey);
+      byte[] contractAddress = WalletApi.decodeFromBase58Check(contractBase58);
+      byte[] delegationKey = ByteArray.fromHexString(delegationPrivateKey);
+    return wallet.triggerContract(ownerAddress, ownerKey, contractAddress,
+            data,originEnergyLimit,energyPay,delegationPay,delegationKey);
   }
 }

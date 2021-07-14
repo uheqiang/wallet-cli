@@ -91,6 +91,7 @@ public class AssetTests {
         String address = "";
         address = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
         address = "TTtQ5cFAN9cxytfcRuW6bGu7dGSJbAp45H";
+        address = "TPdRzuhbVUBbyMAa7XEhvhejyZA2grxprd";
         byte[] addr = WalletApi.decodeFromBase58Check(address);
         Protocol.Account account = WalletApi.queryAccount(addr);
         System.out.println(JsonFormatUtil.formatJson(JsonFormat.printToString(account, true)));
@@ -113,7 +114,7 @@ public class AssetTests {
         String owner = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
         String privateKeyStr = "3b8aaabf34ed7de6ab95fd5e48f8c507a031de381e743935cf3a297312cecc08";
         byte[] privateKey = ByteArray.fromHexString(privateKeyStr);
-        String to = "TTtQ5cFAN9cxytfcRuW6bGu7dGSJbAp45H";
+        String to = "TPdRzuhbVUBbyMAa7XEhvhejyZA2grxprd";
         //String privateKey = "9e8b37d64fc121331674406ec2ac856cb8db3acf33eb47f1ed2fd6b53fa5d460";
         String assertId = "1000001";
         long num = 997;
@@ -134,13 +135,16 @@ public class AssetTests {
     //兑换能量(交易手续费)
     @Test
     public void exchangeFree() {
-        String owner = "TTtQ5cFAN9cxytfcRuW6bGu7dGSJbAp45H";
+        /*String owner = "TTtQ5cFAN9cxytfcRuW6bGu7dGSJbAp45H";
         byte[] ownerAddress = WalletApi.decodeFromBase58Check(owner);
-        String privateKeyStr = "9e8b37d64fc121331674406ec2ac856cb8db3acf33eb47f1ed2fd6b53fa5d460";
+        String privateKeyStr = "9e8b37d64fc121331674406ec2ac856cb8db3acf33eb47f1ed2fd6b53fa5d460";*/
+        String owner = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
+        byte[] ownerAddress = WalletApi.decodeFromBase58Check(owner);
+        String privateKeyStr = "3b8aaabf34ed7de6ab95fd5e48f8c507a031de381e743935cf3a297312cecc08";
         byte[] privateKey = ByteArray.fromHexString(privateKeyStr);
         boolean result = false;
         try {
-            long num = 97;
+            long num = 10000;
             result = walletClient.freezeBalanceForMyself(ownerAddress, privateKey, num);
         } catch (CipherException | IOException | CancelException e) {
             e.printStackTrace();

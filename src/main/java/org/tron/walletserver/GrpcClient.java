@@ -413,17 +413,17 @@ public class GrpcClient {
         && i > 0) {
       i--;
       response = blockingStubFull.broadcastTransaction(signaturedTransaction);
-      System.out.println("repeat times = " + (11 - i));
+      //System.out.println("repeat times = " + (11 - i));
       try {
         Thread.sleep(1000);
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
     }
-    if (response.getResult() == false) {
-      System.out.println("Code = " + response.getCode());
-      System.out.println("Message = " + response.getMessage().toStringUtf8());
-    }
+    //if (response.getResult() == false) {
+    //  System.out.println("Code = " + response.getCode());
+    //  System.out.println("Message = " + response.getMessage().toStringUtf8());
+    //}
     return response.getResult();
   }
 
