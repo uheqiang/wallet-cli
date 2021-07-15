@@ -55,6 +55,10 @@ public class NFTTests {
         //String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
         //0.6.8
         String contract = "TWGKYukW2H1eRZAsYLAqEdxMdhJ3Je9hAt";
+        contract = "TCce7AvnAQuc8bMBwFXPCWjP2heniaDdDo";
+        contract = "TMFsQA7W3YvKDQVRRcbTabVad5kft3iBTU";
+        contract = "TY7D1E5HpNrxMZNGcinRmFWtwQY6urwfbi";
+        contract = "THYkv4ZpSQV1QaQHjj6JWDkDQXA8z5mMNp";
         String method = "name()";
         method = "symbol()";
         String args = "";
@@ -65,19 +69,18 @@ public class NFTTests {
 
     @Test
     public void deployContractProxyPay(){
-        String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
-        //byte[] addr = WalletApi.decodeFromBase58Check(address);
-        String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
+        String address = "TK4hysxx6poz4zWXfZdc6EF4MURfsZdGpY";//11-3
+        String privateKeyStr = "532a5ac5fc42611be31ca6eb42ab9e9367bda4be92a912a1cff11a2e2f849e62";
         String name = "NFT_CONTRACT";
 
-        String sponsorBase58 = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
-        String sponsorPrivateKey = "3b8aaabf34ed7de6ab95fd5e48f8c507a031de381e743935cf3a297312cecc08";
-        long limitPerTransaction = 10;
+        String sponsorBase58 = "TEzf5rMPbg9koskvykmtaFtRFms1SwHghd";//2-2
+        String sponsorPrivateKey = "2b209f726b2fd50603d08df2c7786bf7c8aa446b0ba4aeb66aef133958d07672";
+        long limitPerTransaction = 90;
 
         try {
-            long energyPay = 10;
-            String contractAddress = walletClient.deployContract(owner,
-                    ownerPrivateKey,
+            long energyPay = 5;
+            String contractAddress = walletClient.deployContract(address,
+                    privateKeyStr,
                     name,
                     energyPay,
                     sponsorBase58,

@@ -353,13 +353,13 @@ public class WalletApi {
     }
   }
 
-  private boolean processTransactionExtention(TransactionExtention transactionExtention) {
+  private boolean processTransactionExtention(TransactionExtention transactionExtention) throws CancelException {
     if (transactionExtention == null) {
       return false;
     }
     Return ret = transactionExtention.getResult();
     if (!ret.getResult()) {
-      return false;
+      throw new CancelException(ret.getMessage().toStringUtf8());
     }
     Transaction transaction = transactionExtention.getTransaction();
     if (transaction == null || transaction.getRawData().getContractCount() == 0) {
@@ -381,7 +381,8 @@ public class WalletApi {
     if (!ret.getResult()) {
       //System.out.println("Code = " + ret.getCode());
       //System.out.println("Message = " + ret.getMessage().toStringUtf8());
-      return false;
+      //return false;
+      throw new CancelException(ret.getMessage().toStringUtf8());
     }
     Transaction transaction = transactionExtention.getTransaction();
     if (transaction == null || transaction.getRawData().getContractCount() == 0) {
@@ -456,12 +457,12 @@ public class WalletApi {
   }
 
   public static boolean broadcastTransaction(byte[] transactionBytes)
-      throws InvalidProtocolBufferException {
+          throws InvalidProtocolBufferException, CancelException {
     Transaction transaction = Transaction.parseFrom(transactionBytes);
     return rpcCli.broadcastTransaction(transaction);
   }
 
-  public static boolean broadcastTransaction(Transaction transaction) {
+  public static boolean broadcastTransaction(Transaction transaction) throws CancelException {
     return rpcCli.broadcastTransaction(transaction);
   }
 
@@ -1520,12 +1521,7 @@ public class WalletApi {
 
     TransactionExtention transactionExtention = rpcCli.deployContract(contractDeployContract);
     if (transactionExtention == null || !transactionExtention.getResult().getResult()) {
-      //System.out.println("RPC create trx failed!");
-      if (transactionExtention != null) {
-        //System.out.println("Code = " + transactionExtention.getResult().getCode());
-        //System.out.println("Message = " + transactionExtention.getResult().getMessage().toStringUtf8());
-      }
-      return null;
+      throw new CancelException("RPC create trx failed!");
     }
 
     TransactionExtention.Builder texBuilder = TransactionExtention.newBuilder();

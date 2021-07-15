@@ -75,14 +75,12 @@ public class AccountTests {
 
     @Test
     public void createAccountPersonal() {
-        String userAddressStr = "TPdRzuhbVUBbyMAa7XEhvhejyZA2grxprd";
-        String userPrivateStr = "2a9e6f9b10248fd5181131d7c8a7580a5999d0fe91b2aa2c7ceeb9b815c050ab";
-        //byte[] userPrivateKey = ByteArray.fromHexString(userPrivateStr);
+        String userAddressStr = "TK4hysxx6poz4zWXfZdc6EF4MURfsZdGpY";
 
         String businessAddressStr = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
         String businessPrivateKeyStr = "3b8aaabf34ed7de6ab95fd5e48f8c507a031de381e743935cf3a297312cecc08";
         byte[] businessPrivateKey = ByteArray.fromHexString(businessPrivateKeyStr);
-        String identity = "This is my identity";
+        String identity = "This is my identity, address is " + userAddressStr;
         boolean result = false;
         try {
             result = walletClient.createAccount(WalletApi.decodeFromBase58Check(businessAddressStr),
@@ -105,10 +103,10 @@ public class AccountTests {
      */
     @Test
     public void queryAccountPersonal(){
-        String address = "TPdRzuhbVUBbyMAa7XEhvhejyZA2grxprd";
-        byte[] addr = WalletApi.decodeFromBase58Check(address);
-        Protocol.Account account = WalletApi.queryAccount(addr);
-        System.out.println(JsonFormatUtil.formatJson(JsonFormat.printToString(account, true)));
+        String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
+        //byte[] addr = WalletApi.decodeFromBase58Check(address);
+        //Protocol.Account account = WalletApi.queryAccount(addr);
+        //System.out.println(JsonFormatUtil.formatJson(JsonFormat.printToString(account, true)));
 
         try {
             AccountInfo account1 = walletClient.getAccount(address);

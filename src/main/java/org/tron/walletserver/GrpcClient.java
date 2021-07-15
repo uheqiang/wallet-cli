@@ -12,6 +12,7 @@ import org.tron.api.WalletExtensionGrpc;
 import org.tron.api.WalletGrpc;
 import org.tron.api.WalletSolidityGrpc;
 import org.tron.common.utils.ByteArray;
+import org.tron.core.exception.CancelException;
 import org.tron.protos.Contract;
 import org.tron.protos.Contract.IncrementalMerkleVoucherInfo;
 import org.tron.protos.Contract.OutputPointInfo;
@@ -406,7 +407,7 @@ public class GrpcClient {
     return blockingStubFull.updateWitness2(contract);
   }
 
-  public boolean broadcastTransaction(Transaction signaturedTransaction) {
+  public boolean broadcastTransaction(Transaction signaturedTransaction) throws CancelException {
     int i = 10;
     GrpcAPI.Return response = blockingStubFull.broadcastTransaction(signaturedTransaction);
     while (response.getResult() == false && response.getCode() == response_code.SERVER_BUSY
@@ -420,10 +421,9 @@ public class GrpcClient {
         e.printStackTrace();
       }
     }
-    //if (response.getResult() == false) {
-    //  System.out.println("Code = " + response.getCode());
-    //  System.out.println("Message = " + response.getMessage().toStringUtf8());
-    //}
+    if (response.getResult() == false) {
+      throw new CancelException(response.getMessage().toStringUtf8());
+    }
     return response.getResult();
   }
 

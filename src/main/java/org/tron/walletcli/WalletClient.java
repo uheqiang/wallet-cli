@@ -2,6 +2,7 @@ package org.tron.walletcli;
 
 import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.spongycastle.util.Strings;
 import org.spongycastle.util.encoders.Hex;
@@ -230,9 +231,9 @@ public class WalletClient {
         }
 
         Protocol.Account account = WalletApi.queryAccount(ownerAddress);
-        if (account == null) {
+        if (account == null || ArrayUtils.isEmpty(account.toByteArray())) {
             logger.error("Query account failed !!!!");
-            return builder.build();
+            throw new TronException("Query account failed !!!!");
         } else {
             return builder.addressBase58(addressBase58)
                     .createTime(account.getCreateTime())
@@ -370,9 +371,11 @@ public class WalletClient {
         delegationPayBuilder.setSponsor(sponsor);
         delegationPayBuilder.setSponsorlimitpertransaction(limitPerTransaction);
         byte[] delegationPrivateKey = null;
-        if (StringUtils.isNotEmpty(sponsorPrivateKey)) {
-            delegationPrivateKey = ByteArray.fromHexString(ownerPrivateKey);
+        byte[] bytesPrivateKey= ByteArray.fromHexString(sponsorPrivateKey);
+        if (ArrayUtils.isNotEmpty(bytesPrivateKey)) {
+            delegationPrivateKey = bytesPrivateKey;
         }
+        Objects.requireNonNull(delegationPrivateKey);
         return deployContract(ownerBase58,ownerPrivateKey,contractName,energyPay,
                 delegationPayBuilder.build(),delegationPrivateKey);
 
