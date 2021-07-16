@@ -89,9 +89,9 @@ public class AssetTests {
     @Test
     public void queryBalance() {
         String address = "";
-        address = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
-        address = "TEzf5rMPbg9koskvykmtaFtRFms1SwHghd";
         address = "TK4hysxx6poz4zWXfZdc6EF4MURfsZdGpY";
+        address = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";//487
+        address = "TEzf5rMPbg9koskvykmtaFtRFms1SwHghd";//8
         byte[] addr = WalletApi.decodeFromBase58Check(address);
         Protocol.Account account = WalletApi.queryAccount(addr);
         System.out.println(JsonFormatUtil.formatJson(JsonFormat.printToString(account, true)));
@@ -143,7 +143,7 @@ public class AssetTests {
         byte[] privateKey = ByteArray.fromHexString(privateKeyStr);
         boolean result = false;
         try {
-            long num = 2;
+            long num = 8;
             result = walletClient.freezeBalanceForMyself(ownerAddress, privateKey, num);
         } catch (CipherException | IOException | CancelException e) {
             e.printStackTrace();

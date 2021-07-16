@@ -482,8 +482,8 @@ public class WalletClient {
     /**
      * 根据所有查询NFT的ID
      * @param contractBase58 合约地址
-     * @param ownerBase58 NFT拥有者
-     * @param index NFT的索引
+     * @param ownerBase58 合约拥有者
+     * @param index NFT的索引（totalSupplyFromContract返回的结果）
      */
     public long tokenByIndexFromContract(String contractBase58,
                                          String ownerBase58,
@@ -491,6 +491,22 @@ public class WalletClient {
         List<Object> parameters = Collections.singletonList(index);
         String argsStr = parametersString(parameters);
         String method = "tokenByIndex(uint256)";
+        byte[] result =  callConstantContract(contractBase58, ownerBase58, method, argsStr);
+        return ByteUtil.byteArrayToLong(result);
+    }
+
+    /**
+     * 查询指定用户的NFT的ID
+     * @param contractBase58 合约地址
+     * @param ownerBase58 NFT拥有者
+     * @param index NFT的索引（拥有者的NFT数量）
+     */
+    public long tokenOfOwnerByIndex(String contractBase58,
+                                    String ownerBase58,
+                                    long index) {
+        List<Object> parameters = Arrays.asList(ownerBase58,index);
+        String argsStr = parametersString(parameters);
+        String method = "tokenOfOwnerByIndex(address,uint256)";
         byte[] result =  callConstantContract(contractBase58, ownerBase58, method, argsStr);
         return ByteUtil.byteArrayToLong(result);
     }
@@ -600,8 +616,9 @@ public class WalletClient {
                            long limitPerTransaction)
             throws CancelException {
         Contract.DelegationPay.Builder builder = Contract.DelegationPay.newBuilder();
+        byte[] sponsor = Objects.requireNonNull(WalletApi.decodeFromBase58Check(sponsorAddress));
         Contract.DelegationPay delegationPay = builder.setSupport(true)
-                .setSponsor(ByteString.copyFromUtf8(sponsorAddress))
+                .setSponsor(ByteString.copyFrom(sponsor))
                 .setSponsorlimitpertransaction(limitPerTransaction)
                 .build();
         return mintNft(contractOwner,ownerPrivateKey,contractAddress,mintTo,
@@ -687,9 +704,10 @@ public class WalletClient {
                                String sponsorPrivateKey,
                                long limitPerTransaction)
             throws CancelException {
+        byte[] sponsor = Objects.requireNonNull(WalletApi.decodeFromBase58Check(sponsorAddress));
         Contract.DelegationPay.Builder builder = Contract.DelegationPay.newBuilder();
         Contract.DelegationPay delegationPay = builder.setSupport(true)
-                .setSponsor(ByteString.copyFromUtf8(sponsorAddress))
+                .setSponsor(ByteString.copyFrom(sponsor))
                 .setSponsorlimitpertransaction(limitPerTransaction)
                 .build();
         return transferNft(tokenOwner,ownerPrivateKey,contractAddress,
@@ -785,9 +803,10 @@ public class WalletClient {
                                String sponsorPrivateKey,
                                long limitPerTransaction)
             throws CancelException {
+        byte[] sponsor = Objects.requireNonNull(WalletApi.decodeFromBase58Check(sponsorAddress));
         Contract.DelegationPay.Builder builder = Contract.DelegationPay.newBuilder();
         Contract.DelegationPay delegationPay = builder.setSupport(true)
-                .setSponsor(ByteString.copyFromUtf8(sponsorAddress))
+                .setSponsor(ByteString.copyFrom(sponsor))
                 .setSponsorlimitpertransaction(limitPerTransaction)
                 .build();
         return setTokenMetaData(tokenOwner, ownerPrivateKey, contractAddress,

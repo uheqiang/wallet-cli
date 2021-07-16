@@ -31,7 +31,8 @@ public class NFTTests {
     private String owner = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
     private String ownerPrivateKey = "3b8aaabf34ed7de6ab95fd5e48f8c507a031de381e743935cf3a297312cecc08";
 
-    private String contract = "TEcMUNS2Cz5Kp1yhdPhk11j8k2vC8sUxxj";
+    //private String contract = "THYkv4ZpSQV1QaQHjj6JWDkDQXA8z5mMNp";
+    private String contract = "TTCcs6kQKzbaRLASF364SnqiDymByj8BU6";
 
     @Test
     public void deployContract(){
@@ -59,6 +60,7 @@ public class NFTTests {
         contract = "TMFsQA7W3YvKDQVRRcbTabVad5kft3iBTU";
         contract = "TY7D1E5HpNrxMZNGcinRmFWtwQY6urwfbi";
         contract = "THYkv4ZpSQV1QaQHjj6JWDkDQXA8z5mMNp";
+        contract = "TTCcs6kQKzbaRLASF364SnqiDymByj8BU6";
         String method = "name()";
         method = "symbol()";
         String args = "";
@@ -78,7 +80,7 @@ public class NFTTests {
         long limitPerTransaction = 90;
 
         try {
-            long energyPay = 5;
+            long energyPay = 1;
             String contractAddress = walletClient.deployContract(address,
                     privateKeyStr,
                     name,
@@ -101,9 +103,9 @@ public class NFTTests {
         //0.6.8
         //String contract = "TEcMUNS2Cz5Kp1yhdPhk11j8k2vC8sUxxj";
         byte[] contractAddress = WalletApi.decodeFromBase58Check(contract);
-        long tokenId = 3;
-        String metaData = "This is meta data of the third token!";
-        long energyPay = 10;
+        long tokenId = 6;
+        String metaData = "This is meta data of the 6 token!";
+        long energyPay = 1;
 
         boolean result = false;
         try {
@@ -133,12 +135,12 @@ public class NFTTests {
         //0.6.8
         //String contract = "TEcMUNS2Cz5Kp1yhdPhk11j8k2vC8sUxxj";
         byte[] contractAddress = WalletApi.decodeFromBase58Check(contract);
-        long tokenId = 0L;
-        String metaData = "This is meta data of the first token!";
-        long energyPay = 10L;
+        long tokenId = 6L;
+        String metaData = "This is meta data of the sixth token!";
+        long energyPay = 1L;
 
-        String sponsorBase58 = "TSNZ43xVfLoJ3RGxfE52xkFfENokwkgEXY";
-        String sponsorPrivateKey = "bb3a4643f77cdc584a511cc039d58955f66e341b9d79d43668515c1a5ce979a5";
+        String sponsorBase58 = "TEzf5rMPbg9koskvykmtaFtRFms1SwHghd";
+        String sponsorPrivateKey = "2b209f726b2fd50603d08df2c7786bf7c8aa446b0ba4aeb66aef133958d07672";
         long limitPerTransaction = 10L;
 
         boolean result = false;
@@ -167,7 +169,7 @@ public class NFTTests {
     @Test
     public void balanceOfAndTokenInfo(){
         String address = owner;
-        address = "TTtQ5cFAN9cxytfcRuW6bGu7dGSJbAp45H";
+        address = "TEzf5rMPbg9koskvykmtaFtRFms1SwHghd";
         //0.6.8
         //String contract = "TEcMUNS2Cz5Kp1yhdPhk11j8k2vC8sUxxj";
 
@@ -175,7 +177,7 @@ public class NFTTests {
         System.out.println("balance = " + balance);
 
         for (long index = 0; index < balance; index++) {
-            long tokenId = walletClient.tokenByIndexFromContract(contract, address, index);
+            long tokenId = walletClient.tokenOfOwnerByIndex(contract, address, index);
             System.out.println("token id: " + tokenId);
             String tokenMetaData = walletClient.tokenMateDataFromContract(contract, address, tokenId);
             System.out.println("token meta data: " + tokenMetaData);
@@ -191,9 +193,9 @@ public class NFTTests {
         //0.6.8
         //String contract = "TEcMUNS2Cz5Kp1yhdPhk11j8k2vC8sUxxj";
         byte[] contractAddr = WalletApi.decodeFromBase58Check(contract);
-        long tokenId = 0L;
-        long energyPay = 10L;
-        String to = "TTtQ5cFAN9cxytfcRuW6bGu7dGSJbAp45H";
+        long tokenId = 1L;
+        long energyPay = 1L;
+        String to = "TEzf5rMPbg9koskvykmtaFtRFms1SwHghd";
 
         boolean result = false;
         try {
@@ -219,23 +221,22 @@ public class NFTTests {
         String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
         byte[] addr = WalletApi.decodeFromBase58Check(address);
         String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
-        byte[] ownerPrivateKey = ByteArray.fromHexString(privateKeyStr);
         //0.6.8
         //String contract = "TEcMUNS2Cz5Kp1yhdPhk11j8k2vC8sUxxj";
         byte[] contractAddr = WalletApi.decodeFromBase58Check(contract);
-        long tokenId = 0L;
-        long energyPay = 10L;
-        String to = "TMXnRunmpzLgdP4sG3mYMkZZ8Q6f9DV847";
+        long tokenId = 4L;
+        long energyPay = 500L;
+        String to = "TEzf5rMPbg9koskvykmtaFtRFms1SwHghd";
         byte[] toBytes = WalletApi.decodeFromBase58Check(to);
 
-        String sponsorBase58 = "TSNZ43xVfLoJ3RGxfE52xkFfENokwkgEXY";
-        String sponsorPrivateKey = "bb3a4643f77cdc584a511cc039d58955f66e341b9d79d43668515c1a5ce979a5";
-        long limitPerTransaction = 10L;
+        String sponsorBase58 = "TEzf5rMPbg9koskvykmtaFtRFms1SwHghd";
+        String sponsorPrivateKey = "2b209f726b2fd50603d08df2c7786bf7c8aa446b0ba4aeb66aef133958d07672";
+        long limitPerTransaction = 2000L;
 
         boolean result = false;
         try {
             result = walletClient.transferNft(owner,
-                    owner,
+                    ownerPrivateKey,
                     contract,
                     to,
                     tokenId,
@@ -256,13 +257,13 @@ public class NFTTests {
 
     @Test
     public void setMetaData() {
-        String metaData = "new meta info";
+        String metaData = "This is meta data of the fourth token!";
         String address = "TTtQ5cFAN9cxytfcRuW6bGu7dGSJbAp45H";
         String privateKeyStr = "9e8b37d64fc121331674406ec2ac856cb8db3acf33eb47f1ed2fd6b53fa5d460";
         //0.6.8
         //String contract = "TEcMUNS2Cz5Kp1yhdPhk11j8k2vC8sUxxj";
-        long tokenId = 0L;
-        long energyPay = 10L;
+        long tokenId = 3L;
+        long energyPay = 1L;
         boolean result = false;
         try {
             result = walletClient.setTokenMetaData(owner,
@@ -288,11 +289,11 @@ public class NFTTests {
         String privateKeyStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
         //0.6.8
         //String contract = "TEcMUNS2Cz5Kp1yhdPhk11j8k2vC8sUxxj";
-        long tokenId = 0L;
-        long energyPay = 10L;
+        long tokenId = 1L;
+        long energyPay = 1L;
 
-        String sponsorBase58 = "TSNZ43xVfLoJ3RGxfE52xkFfENokwkgEXY";
-        String sponsorPrivateKey = "bb3a4643f77cdc584a511cc039d58955f66e341b9d79d43668515c1a5ce979a5";
+        String sponsorBase58 = "TEzf5rMPbg9koskvykmtaFtRFms1SwHghd";
+        String sponsorPrivateKey = "2b209f726b2fd50603d08df2c7786bf7c8aa446b0ba4aeb66aef133958d07672";
         long limitPerTransaction = 10L;
 
         boolean result = false;

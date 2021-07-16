@@ -336,7 +336,6 @@ public class WalletApiWrapper {
     }
   }
 
-
   public boolean approveProposal(byte[] ownerAddress,byte[] privateKey, long id, boolean is_add_approval)
       throws CipherException, IOException, CancelException {
     return wallet.approveProposal(ownerAddress, privateKey,id, is_add_approval);
@@ -355,7 +354,7 @@ public class WalletApiWrapper {
   }
 
   public boolean exchangeInject(byte[] ownerAddress, byte[] privateKey,long exchangeId, byte[] tokenId, long quant)
-      throws CipherException, IOException, CancelException {
+      throws CancelException {
     return wallet.exchangeInject(ownerAddress, privateKey,exchangeId, tokenId, quant);
   }
 
@@ -375,7 +374,6 @@ public class WalletApiWrapper {
                                byte[] delegationPrivateKey,
                                long tokenValue, String tokenId, String libraryAddressPair,
                                String compilerVersion) throws CancelException {
-
     return wallet.deployContract(ownerAddress, ownerPrivatekey, name, abiStr, codeStr, feeLimit, value,
             energyPay, delegationPay, delegationPrivateKey, originEnergyLimit, tokenValue, tokenId,
             libraryAddressPair, compilerVersion);

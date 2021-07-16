@@ -343,7 +343,7 @@ public class WalletApi {
   }
 
   private byte[] signdelegationPay(DelegationPay delegationPay, byte[] privateKey) {
-    if (delegationPay == null) {
+    if (delegationPay == null || ArrayUtils.isEmpty(delegationPay.toByteArray())) {
       return null;
     }
     if (isEckey) {
@@ -1442,7 +1442,7 @@ public class WalletApi {
     builder.setCallValue(callValue);
     builder.setOriginEnergyLimit(originEnergyLimit);
     builder.setCallEnergyValue(energyPay);
-    if (delegationPay != null && ArrayUtils.isEmpty(delegationPaySignature)) {
+    if (delegationPay != null && ArrayUtils.isNotEmpty(delegationPaySignature)) {
       builder.setDelegationPay(delegationPay)
               .setDelegationPaySignature(ByteString.copyFrom(delegationPaySignature));
     }
@@ -1613,10 +1613,7 @@ public class WalletApi {
           byte[] delegationPrivatekey,
           boolean isConstant)
           throws CancelException {
-    byte[] delegationPaySignature = null;
-    if (delegationPay != null) {
-      delegationPaySignature = signdelegationPay(delegationPay,delegationPrivatekey);
-    }
+    byte[] delegationPaySignature = signdelegationPay(delegationPay,delegationPrivatekey);
     Contract.TriggerSmartContract triggerContract = triggerCallContract(owner, contractAddress, callValue,
             data, tokenValue, tokenId ,originEnergyLimit, energyPay,delegationPay,delegationPaySignature);
     TransactionExtention transactionExtention;
