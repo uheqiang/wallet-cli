@@ -28,7 +28,7 @@ public class AssetTests {
     public void login() {
         try {
             walletClient.init();
-        } catch (IOException | CipherException e) {
+        } catch (CipherException e) {
             e.printStackTrace();
         }
     }

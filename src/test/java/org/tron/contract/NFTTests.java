@@ -8,8 +8,6 @@ import org.tron.core.exception.CipherException;
 import org.tron.walletcli.WalletClient;
 import org.tron.walletserver.WalletApi;
 
-import java.io.IOException;
-
 /**
  * 发布NFT
  * @author Brian
@@ -23,7 +21,7 @@ public class NFTTests {
     public void login() {
         try {
             walletClient.init();
-        } catch (IOException | CipherException e) {
+        } catch (CipherException e) {
             e.printStackTrace();
         }
     }

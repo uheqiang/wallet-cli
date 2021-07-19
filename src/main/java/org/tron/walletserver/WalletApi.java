@@ -43,12 +43,15 @@ import java.util.regex.Pattern;
 public class WalletApi {
 
   private static final String FilePath = "Wallet";
+
   private List<WalletFile> walletFile = new ArrayList<>();
   private boolean loginState = false;
+  private byte[] address;
+
   private static byte addressPreFixByte;
   private static int rpcVersion = 2;
   private static boolean isEckey = true;
-  private byte[] address;
+  private static String pwd;
 
   // 内置的ERC721协议的智能合约
   public static String contractAbi;
@@ -56,7 +59,7 @@ public class WalletApi {
 
   private static GrpcClient rpcCli;
 
-  public static void init() throws CipherException, IOException {
+  public void init() {
     Config config = Configuration.getByPath("config.conf");
 
     String fullNode = "";
@@ -74,6 +77,10 @@ public class WalletApi {
     }
     if (config.hasPath("crypto.engine")) {
       isEckey = config.getString("crypto.engine").equalsIgnoreCase("eckey");
+    }
+
+    if (config.hasPath("keystore.pwd")) {
+      pwd = config.getString("keystore.pwd");
     }
 
     if (config.hasPath("contract.abi")) {
@@ -137,6 +144,13 @@ public class WalletApi {
 
   public void setLogin() {
     loginState = true;
+  }
+
+  public boolean checkPassword() throws CipherException {
+    if (StringUtils.isEmpty(pwd)) {
+      throw new CipherException("password is empty!");
+    }
+    return checkPassword(pwd.getBytes());
   }
 
   public boolean checkPassword(byte[] passwd) throws CipherException {
@@ -342,6 +356,18 @@ public class WalletApi {
     return transaction;
   }
 
+  private Transaction signTransactionByBusiness(Transaction transaction, String pwd)
+          throws CipherException, IOException {
+    byte[] passwd = org.tron.keystore.StringUtils.char2Byte(pwd.toCharArray());
+    byte[] privateKey = WalletApi.getPrivateBytes(passwd);
+    if (isEckey) {
+      transaction = TransactionUtils.signByBusiness(transaction, this.getEcKey(privateKey));
+    } else {
+      transaction = TransactionUtils.signByBusiness(transaction, this.getSM2(privateKey));
+    }
+    return transaction;
+  }
+
   private byte[] signdelegationPay(DelegationPay delegationPay, byte[] privateKey) {
     if (delegationPay == null || ArrayUtils.isEmpty(delegationPay.toByteArray())) {
       return null;
@@ -373,20 +399,19 @@ public class WalletApi {
   }
 
   private boolean processTransactionExtention(TransactionExtention transactionExtention, byte[] privateKey)
-          throws CancelException {
+          throws CancelException, CipherException, IOException {
     if (transactionExtention == null) {
       return false;
     }
     Return ret = transactionExtention.getResult();
     if (!ret.getResult()) {
-      //System.out.println("Code = " + ret.getCode());
-      //System.out.println("Message = " + ret.getMessage().toStringUtf8());
-      //return false;
+      logger.error("Code = " + ret.getCode());
+      logger.error("Message = " + ret.getMessage().toStringUtf8());
       throw new CancelException(ret.getMessage().toStringUtf8());
     }
     Transaction transaction = transactionExtention.getTransaction();
     if (transaction == null || transaction.getRawData().getContractCount() == 0) {
-      //System.out.println("Transaction is empty");
+      logger.error("Transaction is empty");
       return false;
     }
 
@@ -396,7 +421,14 @@ public class WalletApi {
 
     transaction = signTransaction(transaction, privateKey);
 
-    return rpcCli.broadcastTransaction(transaction);
+    //双重签名
+    Optional<NumberMessage> businessSign = rpcCli.getSupportBusinessSign();
+    if (businessSign.isPresent() && businessSign.get().getNum() == 1L) {
+      Transaction transactionByBusiness = signTransactionByBusiness(transaction, pwd);
+      return rpcCli.broadcastTransaction(transactionByBusiness);
+    } else {
+      return rpcCli.broadcastTransaction(transaction);
+    }
   }
 
   private void showTransactionAfterSign(Transaction transaction)
@@ -505,7 +537,7 @@ public class WalletApi {
    * 注册商家 或称为 可信节点
    */
   public boolean createBusiness(byte[] address, byte[] privateKey,String identity)
-          throws CancelException {
+          throws CancelException, CipherException, IOException {
     PersonalInfo info = PersonalInfo.newBuilder().setIdentity(identity).build();
     Contract.BusinessCreateContract contract = createBusinessCreateContract(address, info);
     TransactionExtention transactionExtention = rpcCli.createBusiness2(contract);
@@ -1076,7 +1108,7 @@ public class WalletApi {
       long firstTokenBalance,
       byte[] secondTokenId,
       long secondTokenBalance)
-      throws CancelException {
+          throws CancelException, CipherException, IOException {
 
     Contract.ExchangeCreateContract contract =
         createExchangeCreateContract(
@@ -1102,7 +1134,7 @@ public class WalletApi {
   }
 
   public boolean exchangeInject(byte[] owner, byte[] privateKey, long exchangeId, byte[] tokenId, long quant)
-      throws CancelException {
+          throws CancelException, CipherException, IOException {
     Contract.ExchangeInjectContract contract =
         createExchangeInjectContract(owner, exchangeId, tokenId, quant);
     TransactionExtention transactionExtention = rpcCli.exchangeInject(contract);
@@ -1122,7 +1154,7 @@ public class WalletApi {
 
   public boolean exchangeTransaction(
       byte[] owner, byte[] pwd,long exchangeId, byte[] tokenId, long quant, long expected)
-      throws CancelException {
+          throws CancelException, CipherException, IOException {
     Contract.ExchangeTransactionContract contract =
         createExchangeTransactionContract(owner, exchangeId, tokenId, quant, expected);
     TransactionExtention transactionExtention = rpcCli.exchangeTransaction(contract);
@@ -1592,7 +1624,7 @@ public class WalletApi {
           long energyPay,
           DelegationPay delegationPay,
           byte[] delegationPrivatekey)
-          throws CancelException {
+          throws CancelException, CipherException, IOException {
     return triggerContract(owner,ownerPrivateKey,contractAddress,
             0L, data,0L,0L,
             "0",originEnergyLimit,energyPay,delegationPay,delegationPrivatekey,false);
@@ -1612,7 +1644,7 @@ public class WalletApi {
           DelegationPay delegationPay,
           byte[] delegationPrivatekey,
           boolean isConstant)
-          throws CancelException {
+          throws CancelException, CipherException, IOException {
     byte[] delegationPaySignature = signdelegationPay(delegationPay,delegationPrivatekey);
     Contract.TriggerSmartContract triggerContract = triggerCallContract(owner, contractAddress, callValue,
             data, tokenValue, tokenId ,originEnergyLimit, energyPay,delegationPay,delegationPaySignature);

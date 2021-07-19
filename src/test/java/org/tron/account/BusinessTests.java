@@ -13,7 +13,6 @@ import org.tron.protos.Protocol;
 import org.tron.walletcli.WalletClient;
 import org.tron.walletserver.WalletApi;
 
-import java.io.IOException;
 
 /**
  * 商家或可信节点账户创建
@@ -28,7 +27,7 @@ public class BusinessTests {
     public void login() {
         try {
             walletClient.init();
-        } catch (IOException | CipherException e) {
+        } catch (CipherException e) {
             e.printStackTrace();
         }
     }

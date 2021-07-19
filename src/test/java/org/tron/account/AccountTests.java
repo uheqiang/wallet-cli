@@ -1,18 +1,14 @@
 package org.tron.account;
 
-import lombok.ToString;
 import org.junit.Before;
 import org.junit.Test;
 import org.tron.common.crypto.ECKey;
 import org.tron.common.entity.AccountInfo;
 import org.tron.common.utils.ByteArray;
-import org.tron.common.utils.JsonFormat;
-import org.tron.common.utils.JsonFormatUtil;
 import org.tron.common.utils.Utils;
 import org.tron.core.exception.CancelException;
 import org.tron.core.exception.CipherException;
 import org.tron.core.exception.TronException;
-import org.tron.protos.Protocol;
 import org.tron.walletcli.WalletClient;
 import org.tron.walletserver.WalletApi;
 
@@ -31,7 +27,7 @@ public class AccountTests {
     public void login() {
         try {
             walletClient.init();
-        } catch (IOException | CipherException e) {
+        } catch (CipherException e) {
             e.printStackTrace();
         }
     }

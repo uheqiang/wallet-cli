@@ -347,6 +347,11 @@ public class GrpcClient {
     return Optional.ofNullable(chainParameters);
   }
 
+  public Optional<NumberMessage> getSupportBusinessSign(){
+    NumberMessage businessSign = blockingStubFull.getSupportBusinessSign(EmptyMessage.newBuilder().build());
+    return Optional.ofNullable(businessSign);
+  }
+
   public TransactionExtention proposalApprove(Contract.ProposalApproveContract contract) {
     return blockingStubFull.proposalApprove(contract);
   }

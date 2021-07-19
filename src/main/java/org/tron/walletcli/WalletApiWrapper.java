@@ -1,6 +1,5 @@
 package org.tron.walletcli;
 
-import ch.qos.logback.core.pattern.color.BoldYellowCompositeConverter;
 import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
 import org.tron.api.GrpcAPI;
@@ -84,38 +83,21 @@ public class WalletApiWrapper {
     }
   }
 
-  public boolean initConfig() throws IOException, CipherException {
-    WalletApi.init();
+  public boolean initConfig() throws CipherException {
     wallet = new WalletApi();
+    wallet.init();
+    if (wallet.checkPassword()) {
+      wallet.setLogin();
+    }
     return true;
   }
 
-//  public boolean login() throws IOException, CipherException {
-//    logout();
-//    wallet = WalletApi.loadWalletFromKeystore();
-//    char[] password = Utils.inputPassword(false);
-//    byte[] passwd = StringUtils.char2Byte(password);
-//    StringUtils.clear(password);
-//    wallet.checkPassword(passwd);
-//    StringUtils.clear(passwd);
-//
-//    if (wallet == null) {
-//      System.out.println("Warning: Login failed, Please registerWallet or importWallet first !!");
-//      return false;
-//    }
-//    wallet.setLogin();
-//    return true;
-//  }
-//
-//  public void logout() {
-//    if (wallet != null) {
-//      wallet.logout();
-//      wallet = null;
-//    }
-//    //Neddn't logout
-//  }
-
-
+  public void logout() {
+    if (wallet != null) {
+      wallet.logout();
+      wallet = null;
+    }
+  }
 
   //password is current, will be enc by password2.
   public byte[] backupWallet() throws IOException, CipherException {
@@ -173,7 +155,7 @@ public class WalletApiWrapper {
   }
 
   public boolean createBusiness(byte[] address,byte[] privateKey,String identity)
-          throws CancelException {
+          throws CancelException, CipherException, IOException {
     return wallet.createBusiness(address,privateKey,identity);
   }
 
@@ -348,18 +330,18 @@ public class WalletApiWrapper {
 
   public boolean exchangeCreate(byte[] ownerAddress, byte[] privateKey, byte[] firstTokenId, long firstTokenBalance,
       byte[] secondTokenId, long secondTokenBalance)
-      throws CancelException {
+          throws CancelException, CipherException, IOException {
     return wallet.exchangeCreate(ownerAddress, privateKey,firstTokenId, firstTokenBalance,
         secondTokenId, secondTokenBalance);
   }
 
   public boolean exchangeInject(byte[] ownerAddress, byte[] privateKey,long exchangeId, byte[] tokenId, long quant)
-      throws CancelException {
+          throws CancelException, CipherException, IOException {
     return wallet.exchangeInject(ownerAddress, privateKey,exchangeId, tokenId, quant);
   }
 
   public boolean exchangeTransaction(byte[] ownerAddress, byte[] ownerPrivatekey,long exchangeId, byte[] tokenId,
-      long quant, long expected) throws CancelException {
+      long quant, long expected) throws CancelException, CipherException, IOException {
     return wallet.exchangeTransaction(ownerAddress, ownerPrivatekey,exchangeId, tokenId, quant, expected);
   }
 
@@ -389,7 +371,7 @@ public class WalletApiWrapper {
                                  String contractBase58, byte[] data, long energyPay,
                                  Contract.DelegationPay delegationPay,
                                  String delegationPrivateKey)
-          throws CancelException {
+          throws CancelException, CipherException, IOException {
     long originEnergyLimit = 100000L;
       byte[] ownerAddress = WalletApi.decodeFromBase58Check(ownerBase58);
       byte[] ownerKey = ByteArray.fromHexString(ownerPrivateKey);

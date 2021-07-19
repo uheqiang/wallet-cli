@@ -32,7 +32,7 @@ public class WalletClient {
 
     private final static String ASSET_ID = "1000001";
 
-    public boolean init() throws IOException, CipherException {
+    public boolean init() throws CipherException {
         walletApiWrapper = new WalletApiWrapper();
         return walletApiWrapper.initConfig();
     }
@@ -325,7 +325,7 @@ public class WalletClient {
      * @return 商家的ID
      */
     public boolean createBusiness(byte[] address,byte[] privateKey,String identity)
-            throws CancelException {
+            throws CancelException, CipherException, IOException {
         return walletApiWrapper.createBusiness(address, privateKey, identity);
     }
 
@@ -557,7 +557,7 @@ public class WalletClient {
                                    String sponsorAddress,
                                    String sponsorPrivateKey,
                                    long limitPerTransaction)
-            throws CancelException {
+            throws CancelException, CipherException, IOException {
         Contract.DelegationPay.Builder builder = Contract.DelegationPay.newBuilder();
         Contract.DelegationPay delegationPay = builder.setSupport(true)
                 .setSponsor(ByteString.copyFromUtf8(sponsorAddress))
@@ -586,7 +586,7 @@ public class WalletClient {
                                    long energyPay,
                                    Contract.DelegationPay delegationPay,
                                    String delegationPrivateKey)
-            throws CancelException {
+            throws CancelException, CipherException, IOException {
         return mintNft(contractOwner,ownerPrivateKey,contractAddress,
                 contractOwner,tokenId,metaData,energyPay,delegationPay,delegationPrivateKey);
     }
@@ -614,7 +614,7 @@ public class WalletClient {
                            String sponsorAddress,
                            String sponsorPrivateKey,
                            long limitPerTransaction)
-            throws CancelException {
+            throws CancelException, CipherException, IOException {
         Contract.DelegationPay.Builder builder = Contract.DelegationPay.newBuilder();
         byte[] sponsor = Objects.requireNonNull(WalletApi.decodeFromBase58Check(sponsorAddress));
         Contract.DelegationPay delegationPay = builder.setSupport(true)
@@ -646,7 +646,7 @@ public class WalletClient {
                            long energyPay,
                            Contract.DelegationPay delegationPay,
                            String delegationPrivateKey)
-            throws CancelException {
+            throws CancelException, CipherException, IOException {
         String method = "mint(address,uint256,string)";
         List<Object> parameters = Arrays.asList(mintTo,tokenId,metaData);
         String argsStr = parametersString(parameters);
@@ -672,7 +672,7 @@ public class WalletClient {
                            long tokenId,
                            String metaData,
                            long energyPay)
-            throws CancelException {
+            throws CancelException, CipherException, IOException {
         String method = "mint(address,uint256,string)";
         List<Object> parameters = Arrays.asList(mintTo,tokenId,metaData);
         String argsStr = parametersString(parameters);
@@ -703,7 +703,7 @@ public class WalletClient {
                                String sponsorAddress,
                                String sponsorPrivateKey,
                                long limitPerTransaction)
-            throws CancelException {
+            throws CancelException, CipherException, IOException {
         byte[] sponsor = Objects.requireNonNull(WalletApi.decodeFromBase58Check(sponsorAddress));
         Contract.DelegationPay.Builder builder = Contract.DelegationPay.newBuilder();
         Contract.DelegationPay delegationPay = builder.setSupport(true)
@@ -732,7 +732,7 @@ public class WalletClient {
                                long energyPay,
                                Contract.DelegationPay delegationPay,
                                String delegationPrivateKey)
-            throws CancelException {
+            throws CancelException, CipherException, IOException {
         String method = "transferFrom(address,address,uint256)";
         List<Object> parameters = Arrays.asList(tokenOwner,to,tokenId);
         String argsStr = parametersString(parameters);
@@ -756,7 +756,7 @@ public class WalletClient {
                                String to,
                                long tokenId,
                                long energyPay)
-            throws CancelException {
+            throws CancelException, CipherException, IOException {
         String method = "transferFrom(address,address,uint256)";
         List<Object> parameters = Arrays.asList(tokenOwner,to,tokenId);
         String argsStr = parametersString(parameters);
@@ -802,7 +802,7 @@ public class WalletClient {
                                String sponsorAddress,
                                String sponsorPrivateKey,
                                long limitPerTransaction)
-            throws CancelException {
+            throws CancelException, CipherException, IOException {
         byte[] sponsor = Objects.requireNonNull(WalletApi.decodeFromBase58Check(sponsorAddress));
         Contract.DelegationPay.Builder builder = Contract.DelegationPay.newBuilder();
         Contract.DelegationPay delegationPay = builder.setSupport(true)
@@ -832,7 +832,7 @@ public class WalletClient {
                                long energyPay,
                                Contract.DelegationPay delegationPay,
                                String delegationPrivateKey)
-            throws CancelException {
+            throws CancelException, CipherException, IOException {
         String method = "setTokenURI(uint256,string)";
         List<Object> parameters = Arrays.asList(tokenId,metaData);
         String argsStr = parametersString(parameters);
@@ -856,7 +856,7 @@ public class WalletClient {
                                long tokenId,
                                String metaData,
                                long energyPay)
-            throws CancelException {
+            throws CancelException, CipherException, IOException {
         String method = "setTokenURI(uint256,string)";
         List<Object> parameters = Arrays.asList(tokenId,metaData);
         String argsStr = parametersString(parameters);

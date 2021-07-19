@@ -225,6 +225,16 @@ public class TransactionUtils {
     return transaction;
   }
 
+  public static Transaction signByBusiness(Transaction transaction, SignInterface myKey) {
+    Transaction.Builder transactionBuilderSigned = transaction.toBuilder();
+    byte[] hash = Sha256Sm3Hash.hash(transaction.toByteArray());
+    SignatureInterface signature = myKey.sign(hash);
+    ByteString bsSign = ByteString.copyFrom(signature.toByteArray());
+    transactionBuilderSigned.setBusinessSignature(bsSign);
+    transaction = transactionBuilderSigned.build();
+    return transaction;
+  }
+
   public static byte[] sign(Contract.DelegationPay delegationPay, SignInterface myKey) {
     byte[] hash = Sha256Sm3Hash.hash(delegationPay.toByteArray());
     SignatureInterface signature = myKey.sign(hash);

@@ -700,6 +700,9 @@ service Wallet {
   rpc UpdateBrokerage (UpdateBrokerageContract) returns (TransactionExtention) {
 
   };
+
+  rpc GetSupportBusinessSign (EmptyMessage) returns (NumberMessage) {
+  };
   // end for shiededTransaction
 };
 
@@ -800,7 +803,6 @@ service WalletSolidity {
 
   rpc ListExchanges (EmptyMessage) returns (ExchangeList) {
   };
-
 
   rpc GetTransactionById (BytesMessage) returns (Transaction) {
     option (google.api.http) = {
