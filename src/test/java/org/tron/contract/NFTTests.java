@@ -8,6 +8,8 @@ import org.tron.core.exception.CipherException;
 import org.tron.walletcli.WalletClient;
 import org.tron.walletserver.WalletApi;
 
+import java.io.IOException;
+
 /**
  * 发布NFT
  * @author Brian
@@ -22,6 +24,8 @@ public class NFTTests {
         try {
             walletClient.init();
         } catch (CipherException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -40,18 +44,22 @@ public class NFTTests {
         byte[] privateKey = ByteArray.fromHexString(ownerPrivateKey);
 
         try {
-            long energyPay = 10;
+            long energyPay = 1;
             String name = "NFT_CONTRACT";
             String contractAddress = walletClient.deployContract(owner,ownerPrivateKey,name,energyPay);
             System.out.println("contract address: " + contractAddress);
         } catch (CancelException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CipherException e) {
             e.printStackTrace();
         }
     }
 
     @Test
     public void callConstantContract() {
-        //String address = "TJch7vVyMx49r63krvbBEFwn3wda3qE3WG";
+        String owner = "TK4hysxx6poz4zWXfZdc6EF4MURfsZdGpY";
         //0.6.8
         String contract = "TWGKYukW2H1eRZAsYLAqEdxMdhJ3Je9hAt";
         contract = "TCce7AvnAQuc8bMBwFXPCWjP2heniaDdDo";
@@ -59,6 +67,8 @@ public class NFTTests {
         contract = "TY7D1E5HpNrxMZNGcinRmFWtwQY6urwfbi";
         contract = "THYkv4ZpSQV1QaQHjj6JWDkDQXA8z5mMNp";
         contract = "TTCcs6kQKzbaRLASF364SnqiDymByj8BU6";
+        contract = "TUqQK8RFaur2bobcRk9CMWVVjM9vCRrMWR";
+        contract = "TJ9QtonwBsVuembNtzX7Pkuw68xPNHULe7";
         String method = "name()";
         method = "symbol()";
         String args = "";
@@ -89,6 +99,10 @@ public class NFTTests {
             System.out.println("contract address: " + contractAddress);
         } catch (CancelException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CipherException e) {
+            e.printStackTrace();
         }
     }
 
@@ -115,6 +129,10 @@ public class NFTTests {
                     metaData,
                     energyPay);
         } catch (CancelException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CipherException e) {
             e.printStackTrace();
         }
         if (result) {
@@ -155,6 +173,10 @@ public class NFTTests {
                     sponsorPrivateKey,
                     limitPerTransaction);
         } catch (CancelException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CipherException e) {
             e.printStackTrace();
         }
         if (result) {
@@ -205,6 +227,10 @@ public class NFTTests {
                     energyPay);
         } catch (CancelException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CipherException e) {
+            e.printStackTrace();
         }
         if (result) {
             System.out.println("Create contract successful !!");
@@ -244,6 +270,10 @@ public class NFTTests {
                     limitPerTransaction);
         } catch (CancelException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CipherException e) {
+            e.printStackTrace();
         }
         if (result) {
             System.out.println("Create contract successful !!");
@@ -271,6 +301,10 @@ public class NFTTests {
                     metaData,
                     energyPay);
         } catch (CancelException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CipherException e) {
             e.printStackTrace();
         }
         if (result) {
@@ -306,6 +340,10 @@ public class NFTTests {
                     sponsorPrivateKey,
                     limitPerTransaction);
         } catch (CancelException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (CipherException e) {
             e.printStackTrace();
         }
         if (result) {

@@ -30,6 +30,8 @@ public class AssetTests {
             walletClient.init();
         } catch (CipherException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

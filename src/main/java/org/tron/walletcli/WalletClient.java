@@ -32,7 +32,7 @@ public class WalletClient {
 
     private final static String ASSET_ID = "1000001";
 
-    public boolean init() throws CipherException {
+    public boolean init() throws CipherException, IOException {
         walletApiWrapper = new WalletApiWrapper();
         return walletApiWrapper.initConfig();
     }
@@ -340,7 +340,7 @@ public class WalletClient {
                                  String ownerPrivateKey,
                                  String contractName,
                                  long energyPay)
-            throws CancelException {
+            throws CancelException, CipherException, IOException {
         byte[] owner = WalletApi.decodeFromBase58Check(ownerBase58);
         byte[] keyBytes = ByteArray.fromHexString(ownerPrivateKey);
         return deployContract(owner,keyBytes,contractName,energyPay,null,null);
@@ -363,7 +363,7 @@ public class WalletClient {
                                  String sponsorBase58,
                                  String sponsorPrivateKey,
                                  long limitPerTransaction)
-            throws CancelException {
+            throws CancelException, CipherException, IOException {
         Contract.DelegationPay.Builder delegationPayBuilder = Contract.DelegationPay.newBuilder();
         delegationPayBuilder.setSupport(true);
         byte[] byteSponsor = Objects.requireNonNull(WalletApi.decodeFromBase58Check(sponsorBase58));
@@ -397,7 +397,7 @@ public class WalletClient {
                                  long energyPay,
                                   Contract.DelegationPay delegationPay,
                                  byte[] delegationPrivateKey)
-            throws CancelException {
+            throws CancelException, CipherException, IOException {
         byte[] owner = WalletApi.decodeFromBase58Check(ownerBase58);
         byte[] keyBytes = ByteArray.fromHexString(ownerPrivateKey);
         return deployContract(owner,keyBytes,contractName,energyPay,delegationPay,delegationPrivateKey);
@@ -417,7 +417,7 @@ public class WalletClient {
                                  long energyPay,
                                  Contract.DelegationPay delegationPay,
                                  byte[] delegationPrivateKey)
-            throws CancelException {
+            throws CancelException, CipherException, IOException {
         List<Object> parameters = Arrays.asList("name", "symbol");
         String argsStr = parametersString(parameters);
         String constructorStr = "constructor(string,string)";
@@ -439,7 +439,7 @@ public class WalletClient {
                                   byte[] delegationPrivateKey,
                                   String libraryAddressPair,
                                   String compilerVersion)
-            throws CancelException {
+            throws CancelException, CipherException, IOException {
         long originEnergyLimit = 1000000L;
         long feeLimit = 0L;
         long value = 0L;

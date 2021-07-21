@@ -13,6 +13,8 @@ import org.tron.protos.Protocol;
 import org.tron.walletcli.WalletClient;
 import org.tron.walletserver.WalletApi;
 
+import java.io.IOException;
+
 
 /**
  * 商家或可信节点账户创建
@@ -29,11 +31,13 @@ public class BusinessTests {
             walletClient.init();
         } catch (CipherException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     @Test
-    public void createAccountBusiness() throws CancelException {
+    public void createAccountBusiness() throws CancelException, CipherException, IOException {
         String ownerAddressStr = "TZGeVYoX3HaD1U89GtkqUSrCCkNcaWBiWk";
         String privateKeyStr = "3b8aaabf34ed7de6ab95fd5e48f8c507a031de381e743935cf3a297312cecc08";
         byte[] ownerAddress = WalletApi.decodeFromBase58Check(ownerAddressStr);

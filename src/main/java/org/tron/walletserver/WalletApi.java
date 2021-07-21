@@ -161,9 +161,6 @@ public class WalletApi {
     return address;
   }
 
-  public WalletApi() {
-  }
-
   /**
    * Creates a Wallet with an existing ECKey.
    * */
@@ -1532,7 +1529,7 @@ public class WalletApi {
       String tokenId,
       String libraryAddressPair,
       String compilerVersion)
-      throws CancelException {
+          throws CancelException, CipherException, IOException {
 
     byte[] delegationPaySignature = signdelegationPay(delegationPay, delegationPrivateKey);
     CreateSmartContract contractDeployContract =
@@ -1578,13 +1575,22 @@ public class WalletApi {
     if (!result) {
       throw new CancelException("Deploy contract cancel, process transaction result is false");
     }
-    Transaction transactionSigned = signTransaction(transactionExtention.getTransaction(), ownerPrivateKey);
-    boolean broadcastResult = rpcCli.broadcastTransaction(transactionSigned);
+    Transaction transaction = signTransaction(transactionExtention.getTransaction(), ownerPrivateKey);
+
+    boolean broadcastResult;
+    //双重签名
+    Optional<NumberMessage> businessSign = rpcCli.getSupportBusinessSign();
+    if (businessSign.isPresent() && businessSign.get().getNum() == 1L) {
+      Transaction transactionByBusiness = signTransactionByBusiness(transaction, pwd);
+      broadcastResult = rpcCli.broadcastTransaction(transactionByBusiness);
+    } else {
+      broadcastResult = rpcCli.broadcastTransaction(transaction);
+    }
+    //boolean broadcastResult = rpcCli.broadcastTransaction(transactionSigned);
     if (!broadcastResult) {
       throw new CancelException("Deploy contract cancel, broadcast transaction fail");
     }
-    byte[] contractAddress = generateContractAddress(owner,transactionSigned);
-    //System.out.println("Your smart contract address will be: " + WalletApi.encode58Check(contractAddress));
+    byte[] contractAddress = generateContractAddress(owner,transaction);
     return WalletApi.encode58Check(contractAddress);
   }
 

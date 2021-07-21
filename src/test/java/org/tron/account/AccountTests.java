@@ -29,12 +29,14 @@ public class AccountTests {
             walletClient.init();
         } catch (CipherException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
     @Test
     public void registerWallet() {
-        String pwd = "123456";
+        String pwd = "852@qazwsx";
         try {
             String name = walletClient.registerWallet(pwd);
             System.out.println(name);
@@ -46,8 +48,8 @@ public class AccountTests {
 
     @Test
     public void importWallet() {
-        String pwd = "123456";
-        String userPrivateStr = "0b19153fe92ae75915afa83bc6cd9cba78a1e5fbedb8cebb6bb6a845aad9adda";
+        String pwd = "963@qazwsx";
+        String userPrivateStr = "3b8aaabf34ed7de6ab95fd5e48f8c507a031de381e743935cf3a297312cecc08";
         byte[] userPrivateKey = ByteArray.fromHexString(userPrivateStr);
         try {
             String name = walletClient.importWallet(pwd, userPrivateKey);
